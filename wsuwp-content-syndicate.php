@@ -29,6 +29,7 @@ class WSU_Content_Syndicate {
 			'object' => 'json_data',
 			'host' => 'news.wsu.edu',
 			'query' => 'posts',
+			'count' => false,
 		);
 
 		$atts = shortcode_atts( $defaults, $atts );
@@ -53,6 +54,10 @@ class WSU_Content_Syndicate {
 		}
 
 		$request_url = esc_url( $host['host'] . '/wp-json/' . $atts['query'] );
+
+		if ( $atts['count'] ) {
+			$request_url = add_query_arg( array( 'filter[posts_per_page]' => absint( $atts['count'] ) ), $request_url );
+		}
 
 		$response = wp_remote_get( $request_url );
 
