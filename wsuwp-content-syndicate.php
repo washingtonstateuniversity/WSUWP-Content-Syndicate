@@ -39,7 +39,21 @@ class WSU_Content_Syndicate {
 			return '<!-- wsuwp_json ERROR - query not supported -->';
 		}
 
-		$request_url = esc_url( $atts['host'] . '/wp-json/' . $atts['query'] );
+		// We only support queries for wsu.edu domains by default
+		$host = parse_url( esc_url( $atts['host'] ) );
+		if ( empty( $host['host'] ) ) {
+			return '<!-- wsuwp_json ERROR - an empty host was supplied -->';
+		}
+
+		$host_parts = explode( '.', $host['host'] );
+		$host_edu = array_pop( $host_parts );
+		$host_wsu = array_pop( $host_parts );
+
+		if ( 'edu' !== $host_edu || 'wsu' !== $host_wsu ) {
+			return '<!-- wsuwp_json ERROR - not a valid domain -->';
+		}
+
+		$request_url = esc_url( $host['host'] . '/wp-json/' . $atts['query'] );
 
 		$response = wp_remote_get( $request_url );
 
