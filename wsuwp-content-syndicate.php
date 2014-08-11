@@ -29,7 +29,6 @@ class WSU_Content_Syndicate {
 			'object' => 'json_data',
 			'host' => 'news.wsu.edu',
 			'query' => 'posts',
-			'format' => 'json',
 		);
 
 		$atts = shortcode_atts( $defaults, $atts );
