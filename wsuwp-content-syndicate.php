@@ -37,6 +37,22 @@ class WSU_Content_Syndicate {
 		$response = wp_remote_get( esc_url( $atts['host'] . '/wp-json/' . $atts['query'] ) );
 		$data = wp_remote_retrieve_body( $response );
 
+		$new_data = array();
+		if ( ! empty( $data ) ) {
+			$data = json_decode( $data );
+			foreach( $data as $post ) {
+				$subset = new StdClass();
+				$subset->ID = $post->ID;
+				$subset->title = $post->title;
+				$subset->excerpt = $post->excerpt;
+				$subset->content = $post->content;
+				$subset->author_name = $post->author->name;
+				$subset->author_avatar = $post->author->avatar;
+				$new_data[] = $subset;
+			}
+		}
+
+		$data = json_encode( $new_data );
 		ob_start();
 		echo '<script>var ' . esc_js( $atts['object'] ) . ' = ' . $data . ';</script>';
 		$content = ob_get_contents();
