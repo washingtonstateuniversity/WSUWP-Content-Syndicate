@@ -49,7 +49,7 @@ class WSU_Content_Syndicate {
 		$host_edu = array_pop( $host_parts );
 		$host_wsu = array_pop( $host_parts );
 
-		if ( 'edu' !== $host_edu || 'wsu' !== $host_wsu ) {
+		if ( ( 'edu' !== $host_edu || 'wsu' !== $host_wsu ) && false === apply_filters( 'wsu_consyn_valid_domain', false, $host['host'] ) ) {
 			return '<!-- wsuwp_json ERROR - not a valid domain -->';
 		}
 
