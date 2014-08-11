@@ -34,7 +34,15 @@ class WSU_Content_Syndicate {
 
 		$atts = shortcode_atts( $defaults, $atts );
 
-		$response = wp_remote_get( esc_url( $atts['host'] . '/wp-json/' . $atts['query'] ) );
+		// We only support queries that start with "posts"
+		if ( 'posts' !== substr( $atts['query'], 0, 5 ) ) {
+			return '<!-- wsuwp_json ERROR - query not supported -->';
+		}
+
+		$request_url = esc_url( $atts['host'] . '/wp-json/' . $atts['query'] );
+
+		$response = wp_remote_get( $request_url );
+
 		$data = wp_remote_retrieve_body( $response );
 
 		$new_data = array();
