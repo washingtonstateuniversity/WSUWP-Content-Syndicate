@@ -22,9 +22,21 @@ class WSU_Content_Syndicate {
 	 *
 	 * @return string
 	 */
-	public function display_wsuwp_json() {
-		ob_start();
+	public function display_wsuwp_json( $atts ) {
+		$defaults = array(
+			'object' => 'json_data',
+			'host' => 'news.wsu.edu',
+			'query' => 'posts',
+			'format' => 'json',
+		);
 
+		$atts = shortcode_atts( $defaults, $atts );
+
+		$response = wp_remote_get( esc_url( $atts['host'] . '/wp-json/' . $atts['query'] ) );
+		$data = wp_remote_retrieve_body( $response );
+
+		ob_start();
+		echo '<script>var ' . esc_js( $atts['object'] ) . ' = ' . $data . ';</script>';
 		$content = ob_get_contents();
 		ob_end_clean();
 
