@@ -20,7 +20,9 @@ class WSU_Content_Syndicate {
 	 * Process the requested parameters for use with the WordPress JSON API and output
 	 * the response accordingly.
 	 *
-	 * @return string
+	 * @param array $atts Attributes passed with the shortcode
+	 *
+	 * @return string Data to output where the shortcode is used.
 	 */
 	public function display_wsuwp_json( $atts ) {
 		$defaults = array(
