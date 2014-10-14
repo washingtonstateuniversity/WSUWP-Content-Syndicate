@@ -92,7 +92,7 @@ class WSU_Content_Syndicate {
 		$content = ob_get_contents();
 		ob_end_clean();
 
-		do_action( 'wsuwp_content_syndicate_json', $atts );
+		$content = apply_filters( 'wsuwp_content_syndicate_json', $content, $atts );
 
 		return $content;
 	}
