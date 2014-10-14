@@ -28,6 +28,7 @@ class WSU_Content_Syndicate {
 		$defaults = array(
 			'object' => 'json_data',
 			'host' => 'news.wsu.edu',
+			'university_category_slug' => '',
 			'query' => 'posts',
 			'count' => false,
 		);
@@ -51,6 +52,11 @@ class WSU_Content_Syndicate {
 
 		if ( ( 'edu' !== $host_edu || 'wsu' !== $host_wsu ) && false === apply_filters( 'wsu_consyn_valid_domain', false, $host['host'] ) ) {
 			return '<!-- wsuwp_json ERROR - not a valid domain -->';
+		}
+
+		// If a University Category slug is provided, ignore the query.
+		if ( '' !== $atts['university_category_slug'] ) {
+			$atts['query'] = 'posts/?filter[taxonomy]=wsuwp_university_category&filter[term]=' . sanitize_key( $atts['university_category_slug'] );
 		}
 
 		$request_url = esc_url( $host['host'] . '/wp-json/' . $atts['query'] );
