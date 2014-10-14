@@ -59,7 +59,7 @@ class WSU_Content_Syndicate {
 			$atts['query'] = 'posts/?filter[taxonomy]=wsuwp_university_category&filter[term]=' . sanitize_key( $atts['university_category_slug'] );
 		}
 
-		$request_url = esc_url( $host['host'] . '/wp-json/' . $atts['query'] );
+		$request_url = esc_url( $host['host'] . '/wp-json/' ) . $atts['query'];
 
 		if ( $atts['count'] ) {
 			$request_url = add_query_arg( array( 'filter[posts_per_page]' => absint( $atts['count'] ) ), $request_url );
