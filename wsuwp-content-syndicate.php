@@ -29,6 +29,7 @@ class WSU_Content_Syndicate {
 			'object' => 'json_data',
 			'host' => 'news.wsu.edu',
 			'university_category_slug' => '',
+			'tag' => '',
 			'query' => 'posts',
 			'count' => false,
 		);
@@ -60,6 +61,10 @@ class WSU_Content_Syndicate {
 		}
 
 		$request_url = esc_url( $host['host'] . '/wp-json/' ) . $atts['query'];
+
+		if ( ! empty( $atts['tag'] ) ) {
+			$request_url = add_query_arg( array( 'filter[tag]' => sanitize_key( $atts['tag'] ) ), $request_url );
+		}
 
 		if ( $atts['count'] ) {
 			$request_url = add_query_arg( array( 'filter[posts_per_page]' => absint( $atts['count'] ) ), $request_url );
