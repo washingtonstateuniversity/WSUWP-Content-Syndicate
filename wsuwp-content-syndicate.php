@@ -31,6 +31,7 @@ class WSU_Content_Syndicate {
 			'university_category_slug' => '',
 			'tag' => '',
 			'query' => 'posts',
+			'local_count' => 0,
 			'count' => false,
 		);
 
@@ -87,9 +88,47 @@ class WSU_Content_Syndicate {
 				$subset->terms = $post->terms;
 				$subset->author_name = $post->author->name;
 				$subset->author_avatar = $post->author->avatar;
-				$new_data[] = $subset;
+
+				$subset_key = strtotime( $post->date );
+				while ( array_key_exists( $subset_key, $new_data ) ) {
+					$subset_key++;
+				}
+				$new_data[ $subset_key ] = $subset;
 			}
 		}
+
+		if ( 0 !== absint( $atts['local_count'] ) ) {
+			$news_query_args = array( 'post_type' => 'post', 'posts_per_page' => absint( $atts['local_count'] ) );
+			$news_query = new WP_Query( $news_query_args );
+
+			while ( $news_query->have_posts() ) {
+				$news_query->the_post();
+				$subset = new StdClass();
+				$subset->ID = get_the_ID();
+				$subset->date = get_the_date();
+				$subset->title = get_the_title();
+				$subset->link = get_the_permalink();
+				$subset->excerpt = get_the_excerpt();
+				$subset->content = get_the_content();
+				$subset->terms = array();
+				$subset->author_name = get_the_author();
+				$subset->author_avatar = '';
+
+				$subset_key = get_the_date( 'U' );
+				while ( array_key_exists( $subset_key, $new_data ) ) {
+					$subset_key++;
+				}
+				$new_data[ $subset_key ] = $subset;
+			}
+			wp_reset_query();
+		}
+
+		// Reverse sort the array of data by date.
+		krsort( $new_data );
+
+		// Only provide a count to match the total count, the array may be larger if local
+		// items are also requested.
+		$new_data = array_slice( $new_data, 0, $atts['count'], false );
 
 		$data = json_encode( $new_data );
 		ob_start();
