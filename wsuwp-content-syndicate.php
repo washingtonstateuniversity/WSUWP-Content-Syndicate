@@ -56,6 +56,12 @@ class WSU_Content_Syndicate {
 			return '<!-- wsuwp_json ERROR - not a valid domain -->';
 		}
 
+		$atts_key = md5( serialize( $atts ) );
+
+		if ( $content = wp_cache_get( $atts_key, 'wsuwp_content' ) ) {
+			return apply_filters( 'wsuwp_content_syndicate_json', $content, $atts );
+		}
+
 		// If a University Category slug is provided, ignore the query.
 		if ( '' !== $atts['university_category_slug'] ) {
 			$atts['query'] = 'posts/?filter[taxonomy]=wsuwp_university_category&filter[term]=' . sanitize_key( $atts['university_category_slug'] );
@@ -135,6 +141,8 @@ class WSU_Content_Syndicate {
 		echo '<script>var ' . esc_js( $atts['object'] ) . ' = ' . $data . ';</script>';
 		$content = ob_get_contents();
 		ob_end_clean();
+
+		wp_cache_add( $atts_key, $content, 'wsuwp_content', 300 );
 
 		$content = apply_filters( 'wsuwp_content_syndicate_json', $content, $atts );
 
