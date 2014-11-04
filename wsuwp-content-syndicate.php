@@ -92,6 +92,7 @@ class WSU_Content_Syndicate {
 				$subset->excerpt = $post->excerpt;
 				$subset->content = $post->content;
 				$subset->terms = $post->terms;
+				$subset->date = $post->date;
 				$subset->author_name = $post->author->name;
 				$subset->author_avatar = $post->author->avatar;
 
