@@ -35,6 +35,7 @@ class WSU_Content_Syndicate {
 			'local_count' => 0,
 			'count' => false,
 			'offset' => 0,
+			'cache_bust' => '',
 		);
 		$atts = shortcode_atts( $defaults, $atts );
 
