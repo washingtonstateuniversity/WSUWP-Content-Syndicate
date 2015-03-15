@@ -310,10 +310,10 @@ class WSU_Content_Syndicate {
 				$subset->date = $post->date;
 
 				// Custom data added to events by WSUWP Extended Events Calendar
-				$subset->start_date = $post->meta->start_date;
-				$subset->event_city = $post->meta->event_city;
-				$subset->event_state = $post->meta->event_state;
-				$subset->event_venue = $post->meta->event_venue;
+				$subset->start_date = isset( $post->meta->start_date ) ? $post->meta->start_date : '';
+				$subset->event_city = isset( $post->meta->event_city ) ? $post->meta->event_city : '';
+				$subset->event_state = isset( $post->meta->event_state ) ? $post->meta->event_state : '';
+				$subset->event_venue = isset( $post->meta->event_venue ) ? $post->meta->event_venue : '';
 
 				$subset_key = strtotime( $post->date );
 				while ( array_key_exists( $subset_key, $new_data ) ) {
