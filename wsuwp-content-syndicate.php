@@ -27,14 +27,17 @@ class WSU_Content_Syndicate {
 	public function display_wsuwp_json( $atts ) {
 		$defaults = array(
 			'object' => 'json_data',
+			'output' => 'json', // Can also be headlines, excerpts, or full
 			'host' => 'news.wsu.edu',
 			'university_category_slug' => '',
 			'tag' => '',
 			'query' => 'posts',
 			'local_count' => 0,
 			'count' => false,
+			'date_format' => 'F j, Y',
+			'offset' => 0,
+			'cache_bust' => '',
 		);
-
 		$atts = shortcode_atts( $defaults, $atts );
 
 		// We only support queries that start with "posts"
@@ -73,6 +76,10 @@ class WSU_Content_Syndicate {
 			$request_url = add_query_arg( array( 'filter[tag]' => sanitize_key( $atts['tag'] ) ), $request_url );
 		}
 
+		if ( ! empty( $atts['offset'] ) ) {
+			$atts['count'] = absint( $atts['count'] ) + absint( $atts['offset'] );
+		}
+
 		if ( $atts['count'] ) {
 			$request_url = add_query_arg( array( 'filter[posts_per_page]' => absint( $atts['count'] ) ), $request_url );
 		}
@@ -95,6 +102,12 @@ class WSU_Content_Syndicate {
 				$subset->date = $post->date;
 				$subset->author_name = $post->author->name;
 				$subset->author_avatar = $post->author->avatar;
+				if ( isset( $post->featured_image ) ) {
+					$subset->thumbnail = $post->featured_image->attachment_meta->sizes->{'post-thumbnail'}->url;
+				} else {
+					$subset->thubmnail = false;
+				}
+
 
 				$subset_key = strtotime( $post->date );
 				while ( array_key_exists( $subset_key, $new_data ) ) {
@@ -116,6 +129,7 @@ class WSU_Content_Syndicate {
 				$subset->title = get_the_title();
 				$subset->link = get_the_permalink();
 				$subset->excerpt = get_the_excerpt();
+				$subset->thumbnail = get_the_post_thumbnail( get_the_ID(), 'post-thumbnail' );
 
 				// Split the content to display an excerpt marked by a more tag.
 				$subset_content = get_the_content();
@@ -143,9 +157,59 @@ class WSU_Content_Syndicate {
 		// items are also requested.
 		$new_data = array_slice( $new_data, 0, $atts['count'], false );
 
-		$data = json_encode( $new_data );
 		ob_start();
-		echo '<script>var ' . esc_js( $atts['object'] ) . ' = ' . $data . ';</script>';
+		// By default, we output a JSON object that can then be used by a script.
+		if ( 'json' === $atts['output'] ) {
+			$data = json_encode( $new_data );
+			echo '<script>var ' . esc_js( $atts['object'] ) . ' = ' . $data . ';</script>';
+		} elseif ( 'headlines' === $atts['output'] ) {
+			?>
+			<div class="wsuwp-content-syndicate-wrapper">
+				<ul class="wsuwp-content-syndicate-list">
+			<?php
+			$offset_x = 0;
+			foreach( $new_data as $content ) {
+				if ( $offset_x < absint( $atts['offset'] ) ) {
+					$offset_x++;
+					continue;
+				}
+				?><li class="wsuwp-content-syndicate-item"><a href="<?php echo $content->link; ?>"><?php echo $content->title; ?></a></li><?php
+			}
+			?>
+				</ul>
+			</div>
+			<?php
+		} elseif ( 'excerpts' === $atts['output'] ) {
+			?>
+			<div class="wsuwp-content-syndicate-wrapper">
+				<ul class="wsuwp-content-syndicate-list">
+					<?php
+					$offset_x = 0;
+					foreach( $new_data as $content ) {
+						if ( $offset_x < absint( $atts['offset'] ) ) {
+							$offset_x++;
+							continue;
+						}
+						?>
+						<li class="wsuwp-content-syndicate-item">
+							<span class="content-item-thumbnail">
+								<?php if ( $content->thumbnail ) : ?><img src="<?php echo $content->thumbnail; ?>"><?php endif; ?></span>
+							<span class="content-item-title"><a href="<?php echo $content->link; ?>"><?php echo $content->title; ?></a></span>
+							<span class="content-item-byline">
+								<span class="content-item-byline-date"><?php echo date( $atts['date_format'], strtotime( $content->date ) ); ?></span>
+								<span class="content-item-byline-author"><?php echo $content->author_name; ?></span>
+							</span>
+							<span class="content-item-excerpt"><?php echo $content->excerpt; ?> <a class="content-item-read-story" href="<?php echo $content->link; ?>">Read Story</a></span>
+						</li>
+					<?php
+					}
+					?>
+				</ul>
+			</div>
+		<?php
+		} else {
+			// Account for full HTML output here.
+		}
 		$content = ob_get_contents();
 		ob_end_clean();
 
