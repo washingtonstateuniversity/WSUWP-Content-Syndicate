@@ -236,87 +236,114 @@ class WSU_Content_Syndicate {
 		return $content;
 	}
 
-	public function display_events( $atts ) {
-		$default_atts = array(
-			'display' => 'full',
-			'headline_wrap' => 'h3',
-			'category' => '',
-			'count' => 10,
+	/**
+	 * Display events information for the [wsuwp_events] shortcode.
+	 *
+	 * @param array $atts
+	 *
+	 * @return string
+	 */
+	public function display_wsuwp_events( $atts ) {
+		$defaults = array(
+			'output' => 'headlines', // Can also be sidebar, full
+			'host' => 'calendar.wsu.edu',
+			'university_category_slug' => '',
+			'tag' => '',
+			'query' => 'posts/?type=tribe_events',
+			'count' => false,
+			'date_format' => 'M j',
+			'cache_bust' => '',
 		);
-		$atts = shortcode_atts( $default_atts, $atts );
+		$atts = shortcode_atts( $defaults, $atts );
 
-		if ( ! in_array( $atts['headline_wrap'], array( 'h1', 'h2', 'h3', 'h4', 'h5', 'h6' ) ) ) {
-			$atts['headline_wrap'] = 'h3';
+		// We only support queries for wsu.edu domains by default
+		$host = parse_url( esc_url( $atts['host'] ) );
+		if ( empty( $host['host'] ) ) {
+			return '<!-- wsuwp_json ERROR - an empty host was supplied -->';
 		}
 
-		$args = array( 'post_type' => 'tribe_events', 'posts_per_page' => absint( $atts['count'] ) );
+		$host_parts = explode( '.', $host['host'] );
+		$host_edu = array_pop( $host_parts );
+		$host_wsu = array_pop( $host_parts );
 
-		if ( '' !== $atts['category'] ) {
-			$args['tax_query'] = array(
-				array(
-					'taxonomy' => 'tribe_events_cat',
-					'field' => 'slug',
-					'terms' => $atts['category'],
-				),
-			);
+		if ( ( ! in_array( $host_edu, array( 'edu', 'dev' ) ) || 'wsu' !== $host_wsu ) && false === apply_filters( 'wsu_consyn_valid_domain', false, $host['host'] ) ) {
+			return '<!-- wsuwp_json ERROR - not a valid domain -->';
 		}
 
-		$events = new WP_Query( $args );
+		$atts_key = md5( serialize( $atts ) );
 
-		if ( 'headlines' === $atts['display'] ) {
-			ob_start();
+		if ( $content = wp_cache_get( $atts_key, 'wsuwp_content' ) ) {
+			return apply_filters( 'wsuwp_content_syndicate_json', $content, $atts );
+		}
 
-			echo '<ul class="events-headlines">';
-			while ( $events->have_posts() ) {
-				$events->the_post();
-				$date = tribe_get_start_date( get_the_ID(), false, 'U' );
-				echo '<li><time datetime="' . date( 'Y-m-d', $date ) .'">' . date( 'M&\\nb\\sp;j', $date ) . '</time> <a href="' . get_the_permalink( get_the_ID() ) . '">' . get_the_title() . '</a></li>';
+		// If a University Category slug is provided, ignore the query.
+		if ( '' !== $atts['university_category_slug'] ) {
+			$atts['query'] = 'posts/?type=tribe_events&filter[taxonomy]=wsuwp_university_category&filter[term]=' . sanitize_key( $atts['university_category_slug'] );
+		}
+
+		$request_url = esc_url( $host['host'] . '/wp-json/' ) . $atts['query'];
+
+		if ( ! empty( $atts['tag'] ) ) {
+			$request_url = add_query_arg( array( 'filter[tag]' => sanitize_key( $atts['tag'] ) ), $request_url );
+		}
+
+		if ( $atts['count'] ) {
+			$request_url = add_query_arg( array( 'filter[posts_per_page]' => absint( $atts['count'] ) ), $request_url );
+		}
+
+		$response = wp_remote_get( $request_url );
+
+		$data = wp_remote_retrieve_body( $response );
+
+		$new_data = array();
+		if ( ! empty( $data ) ) {
+			$data = json_decode( $data );
+
+			foreach( $data as $post ) {
+				$subset = new StdClass();
+				$subset->ID = $post->ID;
+				$subset->title = $post->title;
+				$subset->link = $post->link;
+				$subset->excerpt = $post->excerpt;
+				$subset->content = $post->content;
+				$subset->terms = $post->terms;
+				$subset->date = $post->date;
+				$subset->start_date = $post->meta->start_date;
+				$subset_key = strtotime( $post->date );
+				while ( array_key_exists( $subset_key, $new_data ) ) {
+					$subset_key++;
+				}
+				$new_data[ $subset_key ] = $subset;
 			}
-			echo '</ul>';
+		}
 
-			$content = ob_get_contents();
-			ob_end_clean();
+		// Reverse sort the array of data by date.
+		krsort( $new_data );
 
-		} elseif ( 'sidebar' === $atts['display'] ) {
-			ob_start();
-
-			echo '<div class="cob-events-sidebar">';
-			while ( $events->have_posts() ) {
-				$events->the_post();
-				echo '<div class="cob-sidebar-event">';
-				echo '<' . $atts['headline_wrap'] . '><a href="' . get_the_permalink( get_the_ID() ) . '">' . get_the_title() . '</a></' . $atts['headline_wrap'] . '>';
-				echo tribe_events_event_schedule_details();
-				echo '<p>' . get_the_excerpt() . '</p>';
-				echo '</div>';
-			}
-			echo '</div>';
-
-			$content = ob_get_contents();
-			ob_end_clean();
-		} else {
-			ob_start();
+		ob_start();
+		if ( 'headlines' === $atts['output'] ) {
 			?>
-			<div class="tribe-events-loop vcalendar">
-
-				<?php while ( $events->have_posts() ) : $events->the_post(); ?>
-
-					<!-- Month / Year Headers -->
-					<?php tribe_events_list_the_date_headers(); ?>
-
-					<!-- Event  -->
-					<div id="post-<?php get_the_ID() ?>" class="<?php tribe_events_event_classes() ?>">
-						<?php tribe_get_template_part( 'list/single', 'event' ) ?>
-					</div><!-- .hentry .vevent -->
-
-				<?php endwhile; ?>
-
-			</div><!-- .tribe-events-loop -->
-			<?php
-			$content = ob_get_contents();
-			ob_end_clean();
+			<div class="wsuwp-content-syndicate-wrapper">
+				<ul class="wsuwp-content-syndicate-list">
+					<?php
+					foreach( $new_data as $content ) {
+						?>
+						<li class="wsuwp-content-syndicate-event">
+							<span class="content-item-event-date"><?php echo date( $atts['date_format'], strtotime( $content->start_date ) ); ?></span>
+							<span class="content-item-event-title"><a href="<?php echo $content->link; ?>"><?php echo $content->title; ?></a></span>
+						</li><?php
+					}
+					?>
+				</ul>
+			</div>
+		<?php
 		}
+		$content = ob_get_contents();
+		ob_end_clean();
 
-		wp_reset_query();
+		wp_cache_add( $atts_key, $content, 'wsuwp_content', 300 );
+
+		$content = apply_filters( 'wsuwp_content_syndicate_json', $content, $atts );
 
 		return $content;
 	}
