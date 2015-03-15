@@ -308,7 +308,13 @@ class WSU_Content_Syndicate {
 				$subset->content = $post->content;
 				$subset->terms = $post->terms;
 				$subset->date = $post->date;
+
+				// Custom data added to events by WSUWP Extended Events Calendar
 				$subset->start_date = $post->meta->start_date;
+				$subset->event_city = $post->meta->event_city;
+				$subset->event_state = $post->meta->event_state;
+				$subset->event_venue = $post->meta->event_venue;
+
 				$subset_key = strtotime( $post->date );
 				while ( array_key_exists( $subset_key, $new_data ) ) {
 					$subset_key++;
@@ -331,6 +337,11 @@ class WSU_Content_Syndicate {
 						<li class="wsuwp-content-syndicate-event">
 							<span class="content-item-event-date"><?php echo date( $atts['date_format'], strtotime( $content->start_date ) ); ?></span>
 							<span class="content-item-event-title"><a href="<?php echo $content->link; ?>"><?php echo $content->title; ?></a></span>
+							<span class="content-item-event-meta">
+								<span class="content-item-event-venue"><?php echo esc_html( $content->event_venue ); ?></span>
+								<span class="content-item-event-city"><?php echo esc_html( $content->event_city ); ?></span>
+								<span class="content-item-event-state"><?php echo esc_html( $content->event_state ); ?></span>
+							</span>
 						</li><?php
 					}
 					?>
