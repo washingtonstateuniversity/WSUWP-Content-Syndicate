@@ -214,7 +214,7 @@ class WSU_Content_Syndicate {
 		$content = ob_get_contents();
 		ob_end_clean();
 
-		wp_cache_add( $atts_key, $content, 'wsuwp_content', 300 );
+		wp_cache_add( $atts_key, $content, 'wsuwp_content', 600 );
 
 		$content = apply_filters( 'wsuwp_content_syndicate_json', $content, $atts );
 
@@ -352,7 +352,7 @@ class WSU_Content_Syndicate {
 		$content = ob_get_contents();
 		ob_end_clean();
 
-		wp_cache_add( $atts_key, $content, 'wsuwp_content', 300 );
+		wp_cache_add( $atts_key, $content, 'wsuwp_content', 600 );
 
 		$content = apply_filters( 'wsuwp_content_syndicate_json', $content, $atts );
 
