@@ -170,8 +170,11 @@ class WSU_Content_Syndicate {
 						<li class="wsuwp-content-syndicate-item">
 							<span class="content-item-thumbnail"></span>
 							<span class="content-item-title"><a href="<?php echo $content->link; ?>"><?php echo $content->title; ?></a></span>
-							<span class="content-item-byline"></span>
-							<span class="content-item-excerpt"></span>
+							<span class="content-item-byline">
+								<span class="content-item-byline-date"><?php echo $content->date; ?></span>
+								<span class="content-item-byline-author"><?php echo $content->author_name; ?></span>
+							</span>
+							<span class="content-item-excerpt"><?php echo $content->excerpt; ?> <a class="content-item-read-story" href="<?php echo $content->link; ?>">Read Story</a></span>
 						</li>
 					<?php
 					}
