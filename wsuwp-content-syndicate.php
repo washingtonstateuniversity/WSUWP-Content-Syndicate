@@ -34,6 +34,7 @@ class WSU_Content_Syndicate {
 			'query' => 'posts',
 			'local_count' => 0,
 			'count' => false,
+			'offset' => 0,
 		);
 		$atts = shortcode_atts( $defaults, $atts );
 
@@ -71,6 +72,10 @@ class WSU_Content_Syndicate {
 
 		if ( ! empty( $atts['tag'] ) ) {
 			$request_url = add_query_arg( array( 'filter[tag]' => sanitize_key( $atts['tag'] ) ), $request_url );
+		}
+
+		if ( ! empty( $atts['offset'] ) ) {
+			$atts['count'] = absint( $atts['count'] ) + absint( $atts['offset'] );
 		}
 
 		if ( $atts['count'] ) {
@@ -160,7 +165,12 @@ class WSU_Content_Syndicate {
 			<div class="wsuwp-content-syndicate-wrapper">
 				<ul class="wsuwp-content-syndicate-list">
 			<?php
+			$offset_x = 0;
 			foreach( $new_data as $content ) {
+				if ( $offset_x < absint( $atts['offset'] ) ) {
+					$offset_x++;
+					continue;
+				}
 				?><li class="wsuwp-content-syndicate-item"><a href="<?php echo $content->link; ?>"><?php echo $content->title; ?></a></li><?php
 			}
 			?>
@@ -172,7 +182,12 @@ class WSU_Content_Syndicate {
 			<div class="wsuwp-content-syndicate-wrapper">
 				<ul class="wsuwp-content-syndicate-list">
 					<?php
+					$offset_x = 0;
 					foreach( $new_data as $content ) {
+						if ( $offset_x < absint( $atts['offset'] ) ) {
+							$offset_x++;
+							continue;
+						}
 						?>
 						<li class="wsuwp-content-syndicate-item">
 							<span class="content-item-thumbnail">
