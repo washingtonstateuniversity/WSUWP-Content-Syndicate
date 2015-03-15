@@ -336,7 +336,7 @@ class WSU_Content_Syndicate {
 						?>
 						<li class="wsuwp-content-syndicate-event">
 							<span class="content-item-event-date"><?php echo date( $atts['date_format'], strtotime( $content->start_date ) ); ?></span>
-							<span class="content-item-event-title"><a href="<?php echo $content->link; ?>"><?php echo $content->title; ?></a></span>
+							<span class="content-item-event-title"><a href="<?php echo esc_url( $content->link ); ?>"><?php echo esc_html( $content->title ); ?></a></span>
 							<span class="content-item-event-meta">
 								<span class="content-item-event-venue"><?php echo esc_html( $content->event_venue ); ?></span>
 								<span class="content-item-event-city"><?php echo esc_html( $content->event_city ); ?></span>
