@@ -34,6 +34,7 @@ class WSU_Content_Syndicate {
 			'query' => 'posts',
 			'local_count' => 0,
 			'count' => false,
+			'date_format' => 'F j, Y',
 			'offset' => 0,
 			'cache_bust' => '',
 		);
@@ -195,7 +196,7 @@ class WSU_Content_Syndicate {
 								<?php if ( $content->thumbnail ) : ?><img src="<?php echo $content->thumbnail; ?>"><?php endif; ?></span>
 							<span class="content-item-title"><a href="<?php echo $content->link; ?>"><?php echo $content->title; ?></a></span>
 							<span class="content-item-byline">
-								<span class="content-item-byline-date"><?php echo $content->date; ?></span>
+								<span class="content-item-byline-date"><?php echo date( $atts['date_format'], strtotime( $content->date ) ); ?></span>
 								<span class="content-item-byline-author"><?php echo $content->author_name; ?></span>
 							</span>
 							<span class="content-item-excerpt"><?php echo $content->excerpt; ?> <a class="content-item-read-story" href="<?php echo $content->link; ?>">Read Story</a></span>
