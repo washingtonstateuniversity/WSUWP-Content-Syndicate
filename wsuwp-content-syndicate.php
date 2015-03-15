@@ -95,6 +95,12 @@ class WSU_Content_Syndicate {
 				$subset->date = $post->date;
 				$subset->author_name = $post->author->name;
 				$subset->author_avatar = $post->author->avatar;
+				if ( isset( $post->featured_image ) ) {
+					$subset->thumbnail = $post->featured_image->attachment_meta->sizes->{'post-thumbnail'}->url;
+				} else {
+					$subset->thubmnail = false;
+				}
+
 
 				$subset_key = strtotime( $post->date );
 				while ( array_key_exists( $subset_key, $new_data ) ) {
@@ -116,6 +122,7 @@ class WSU_Content_Syndicate {
 				$subset->title = get_the_title();
 				$subset->link = get_the_permalink();
 				$subset->excerpt = get_the_excerpt();
+				$subset->thumbnail = get_the_post_thumbnail( get_the_ID(), 'post-thumbnail' );
 
 				// Split the content to display an excerpt marked by a more tag.
 				$subset_content = get_the_content();
@@ -168,7 +175,8 @@ class WSU_Content_Syndicate {
 					foreach( $new_data as $content ) {
 						?>
 						<li class="wsuwp-content-syndicate-item">
-							<span class="content-item-thumbnail"></span>
+							<span class="content-item-thumbnail">
+								<?php if ( $content->thumbnail ) : ?><img src="<?php echo $content->thumbnail; ?>"><?php endif; ?></span>
 							<span class="content-item-title"><a href="<?php echo $content->link; ?>"><?php echo $content->title; ?></a></span>
 							<span class="content-item-byline">
 								<span class="content-item-byline-date"><?php echo $content->date; ?></span>
