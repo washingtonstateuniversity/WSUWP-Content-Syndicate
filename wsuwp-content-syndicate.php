@@ -27,6 +27,7 @@ class WSU_Content_Syndicate {
 	public function display_wsuwp_json( $atts ) {
 		$defaults = array(
 			'object' => 'json_data',
+			'output' => 'json', // Can also be html
 			'host' => 'news.wsu.edu',
 			'university_category_slug' => '',
 			'tag' => '',
@@ -34,7 +35,6 @@ class WSU_Content_Syndicate {
 			'local_count' => 0,
 			'count' => false,
 		);
-
 		$atts = shortcode_atts( $defaults, $atts );
 
 		// We only support queries that start with "posts"
@@ -143,9 +143,28 @@ class WSU_Content_Syndicate {
 		// items are also requested.
 		$new_data = array_slice( $new_data, 0, $atts['count'], false );
 
-		$data = json_encode( $new_data );
 		ob_start();
-		echo '<script>var ' . esc_js( $atts['object'] ) . ' = ' . $data . ';</script>';
+		// By default, we output a JSON object that can then be used by a script.
+		if ( 'json' === $atts['output'] ) {
+			$data = json_encode( $new_data );
+			echo '<script>var ' . esc_js( $atts['object'] ) . ' = ' . $data . ';</script>';
+		} else {
+			?>
+			<div class="wsuwp-content-syndicate-wrapper">
+				<ul class="wsuwp-content-syndicate-list">
+			<?php
+			foreach( $new_data as $content ) {
+				?>
+				<li class="wsuwp-content-syndicate-item">
+					<a href="<?php echo $content->link; ?>"><?php echo $content->title; ?></a>
+				</li>
+				<?php
+			}
+			?>
+				</ul>
+			</div>
+			<?php
+		}
 		$content = ob_get_contents();
 		ob_end_clean();
 
