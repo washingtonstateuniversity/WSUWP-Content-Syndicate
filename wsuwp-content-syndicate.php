@@ -67,12 +67,14 @@ class WSU_Content_Syndicate {
 			return apply_filters( 'wsuwp_content_syndicate_json', $content, $atts );
 		}
 
-		// If a University Category slug is provided, ignore the query.
-		if ( '' !== $atts['university_category_slug'] ) {
-			$atts['query'] = 'posts/?filter[taxonomy]=wsuwp_university_category&filter[term]=' . sanitize_key( $atts['university_category_slug'] );
-		}
-
 		$request_url = esc_url( $host['host'] . '/wp-json/' ) . $atts['query'];
+
+		if ( ! empty( $atts['university_category_slug'] ) ) {
+			$request_url = add_query_arg( array(
+				'filter[taxonomy]' => 'wsuwp_university_category',
+				'filter[term]' => sanitize_key( $atts['university_category_slug'] )
+			), $request_url );
+		}
 
 		if ( ! empty( $atts['site_category_slug'] ) ) {
 			$request_url = add_query_arg( array(
@@ -116,7 +118,6 @@ class WSU_Content_Syndicate {
 				} else {
 					$subset->thubmnail = false;
 				}
-
 
 				$subset_key = strtotime( $post->date );
 				while ( array_key_exists( $subset_key, $new_data ) ) {
