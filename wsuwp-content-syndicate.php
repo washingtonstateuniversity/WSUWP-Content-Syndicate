@@ -119,7 +119,12 @@ class WSU_Content_Syndicate {
 					$subset->thubmnail = false;
 				}
 
-				$subset_key = strtotime( $post->date );
+				if ( $post->date ) {
+					$subset_key = strtotime( $post->date );
+				} else {
+					$subset_key = time();
+				}
+
 				while ( array_key_exists( $subset_key, $new_data ) ) {
 					$subset_key++;
 				}
