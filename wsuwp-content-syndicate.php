@@ -337,9 +337,6 @@ class WSU_Content_Syndicate {
 			}
 		}
 
-		// Reverse sort the array of data by date.
-		krsort( $new_data );
-
 		ob_start();
 		if ( 'headlines' === $atts['output'] ) {
 			?>
