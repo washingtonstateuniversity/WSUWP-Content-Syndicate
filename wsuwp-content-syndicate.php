@@ -261,8 +261,8 @@ class WSU_Content_Syndicate {
 		$defaults = array(
 			'output' => 'headlines', // Can also be sidebar, full
 			'host' => 'calendar.wsu.edu',
-			'university_category_slug' => '',
 			'tag' => '',
+			'category' => '',
 			'query' => 'posts/?type=tribe_events',
 			'count' => false,
 			'date_format' => 'M j',
@@ -290,9 +290,8 @@ class WSU_Content_Syndicate {
 			return apply_filters( 'wsuwp_content_syndicate_json', $content, $atts );
 		}
 
-		// If a University Category slug is provided, ignore the query.
-		if ( '' !== $atts['university_category_slug'] ) {
-			$atts['query'] = 'posts/?type=tribe_events&filter[taxonomy]=wsuwp_university_category&filter[term]=' . sanitize_key( $atts['university_category_slug'] );
+		if ( '' !== $atts['category'] ) {
+			$atts['query'] = 'posts/?type=tribe_events&filter[taxonomy]=tribe_events_cat&filter[term]=' . sanitize_key( $atts['category'] );
 		}
 
 		$request_url = esc_url( $host['host'] . '/wp-json/' ) . $atts['query'];
