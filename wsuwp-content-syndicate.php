@@ -291,7 +291,13 @@ class WSU_Content_Syndicate {
 		}
 
 		if ( '' !== $atts['category'] ) {
-			$atts['query'] = 'posts/?type=tribe_events&filter[taxonomy]=tribe_events_cat&filter[term]=' . sanitize_key( $atts['category'] );
+			$atts['query'] = 'posts/?type=tribe_events&filter[taxonomy]=tribe_events_cat';
+
+			$terms = explode( ',', $atts['category'] );
+			foreach( $terms as $term ) {
+				$term = trim( $term );
+				$atts['query'] .= '&filter[term]=' . sanitize_key( $term );
+			}
 		}
 
 		$request_url = esc_url( $host['host'] . '/wp-json/' ) . $atts['query'];
