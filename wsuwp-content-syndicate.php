@@ -179,7 +179,9 @@ class WSU_Content_Syndicate {
 
 		// Only provide a count to match the total count, the array may be larger if local
 		// items are also requested.
-		$new_data = array_slice( $new_data, 0, $atts['count'], false );
+		if ( $atts['count'] ) {
+			$new_data = array_slice( $new_data, 0, $atts['count'], false );
+		}
 
 		ob_start();
 		// By default, we output a JSON object that can then be used by a script.
