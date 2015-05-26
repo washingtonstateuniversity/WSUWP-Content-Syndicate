@@ -30,6 +30,7 @@ class WSU_Content_Syndicate {
 			'object' => 'json_data',
 			'output' => 'json', // Can also be headlines, excerpts, or full
 			'host' => 'news.wsu.edu',
+			'site' => '',
 			'university_category_slug' => '',
 			'site_category_slug' => '',
 			'tag' => '',
@@ -47,17 +48,23 @@ class WSU_Content_Syndicate {
 			return '<!-- wsuwp_json ERROR - query not supported -->';
 		}
 
-		// We only support queries for wsu.edu domains by default
-		$host = parse_url( esc_url( $atts['host'] ) );
-		if ( empty( $host['host'] ) ) {
+		// If a site attribute is provided, it overrides the host attribute.
+		if ( ! empty( $atts['site'] ) ) {
+			$site_url = parse_url( esc_url( $atts['site'] ) );
+		} else {
+			$site_url = parse_url( esc_url( $atts['host'] ) );
+		}
+
+		if ( empty( $site_url['host'] ) ) {
 			return '<!-- wsuwp_json ERROR - an empty host was supplied -->';
 		}
 
-		$host_parts = explode( '.', $host['host'] );
+		$host_parts = explode( '.', $site_url['host'] );
 		$host_edu = array_pop( $host_parts );
 		$host_wsu = array_pop( $host_parts );
 
-		if ( ( 'edu' !== $host_edu || 'wsu' !== $host_wsu ) && false === apply_filters( 'wsu_consyn_valid_domain', false, $host['host'] ) ) {
+		// We only support queries for wsu.edu domains by default
+		if ( ( 'edu' !== $host_edu || 'wsu' !== $host_wsu ) && false === apply_filters( 'wsu_consyn_valid_domain', false, $site_url['host'] ) ) {
 			return '<!-- wsuwp_json ERROR - not a valid domain -->';
 		}
 
@@ -67,7 +74,7 @@ class WSU_Content_Syndicate {
 			return apply_filters( 'wsuwp_content_syndicate_json', $content, $atts );
 		}
 
-		$request_url = esc_url( $host['host'] . '/wp-json/' ) . $atts['query'];
+		$request_url = esc_url( $site_url['host'] . $site_url['path'] . 'wp-json/' ) . $atts['query'];
 
 		if ( ! empty( $atts['university_category_slug'] ) ) {
 			$request_url = add_query_arg( array(
