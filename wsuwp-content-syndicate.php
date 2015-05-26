@@ -1,10 +1,10 @@
 <?php
 /*
 Plugin Name: WSU Content Syndicate
-Plugin URI: http://web.wsu.edu
+Plugin URI: https://web.wsu.edu/
 Description: Retrieve content for display from throughout Washington State University
 Author: washingtonstateuniversity, jeremyfelt
-Version: 0.4.5
+Version: 0.5.0
 */
 
 class WSU_Content_Syndicate {
@@ -21,7 +21,7 @@ class WSU_Content_Syndicate {
 	 * Process the requested parameters for use with the WordPress JSON API and output
 	 * the response accordingly.
 	 *
-	 * @param array $atts Attributes passed with the shortcode
+	 * @param array $atts Attributes passed with the shortcode.
 	 *
 	 * @return string Data to output where the shortcode is used.
 	 */
