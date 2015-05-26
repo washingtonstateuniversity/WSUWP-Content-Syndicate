@@ -55,6 +55,8 @@ class WSU_Content_Syndicate {
 			$site_url = parse_url( esc_url( $atts['host'] ) );
 		}
 
+		$site_url['path'] = trailingslashit( $site_url['path'] );
+
 		if ( empty( $site_url['host'] ) ) {
 			return '<!-- wsuwp_json ERROR - an empty host was supplied -->';
 		}
