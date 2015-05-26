@@ -50,12 +50,12 @@ class WSU_Content_Syndicate {
 
 		// If a site attribute is provided, it overrides the host attribute.
 		if ( ! empty( $atts['site'] ) ) {
-			$site_url = parse_url( esc_url( $atts['site'] ) );
+			$site_url = trailingslashit( esc_url( $atts['site'] ) );
 		} else {
-			$site_url = parse_url( esc_url( $atts['host'] ) );
+			$site_url = trailingslashit( esc_url( $atts['host'] ) );
 		}
 
-		$site_url['path'] = trailingslashit( $site_url['path'] );
+		$site_url = parse_url( $site_url );
 
 		if ( empty( $site_url['host'] ) ) {
 			return '<!-- wsuwp_json ERROR - an empty host was supplied -->';
