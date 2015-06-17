@@ -66,7 +66,7 @@ class WSU_Content_Syndicate {
 		);
 		$atts = shortcode_atts( $defaults, $atts );
 
-		// We only support queries that start with "posts"
+		// We only support queries that start with "posts".
 		if ( 'posts' !== substr( $atts['query'], 0, 5 ) ) {
 			return '<!-- wsuwp_json ERROR - query not supported -->';
 		}
@@ -93,6 +93,8 @@ class WSU_Content_Syndicate {
 			return '<!-- wsuwp_json ERROR - not a valid domain -->';
 		}
 
+		// Create a hash of all attributes to use as a cache key. If any attribute changes,
+		// then the cache will regenerate on the next load.
 		$atts_key = md5( serialize( $atts ) );
 
 		if ( $content = wp_cache_get( $atts_key, 'wsuwp_content' ) ) {
