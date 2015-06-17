@@ -324,7 +324,7 @@ class WSU_Content_Syndicate {
 	 */
 	public function display_wsuwp_events( $atts ) {
 		$defaults = array(
-			'output' => 'headlines', // Can also be sidebar, full
+			'output' => 'headlines',
 			'host' => 'calendar.wsu.edu',
 			'site' => '',
 			'tag' => '',
