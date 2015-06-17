@@ -21,14 +21,37 @@ class WSU_Content_Syndicate {
 	 * Process the requested parameters for use with the WordPress JSON API and output
 	 * the response accordingly.
 	 *
-	 * @param array $atts Attributes passed with the shortcode.
+	 * @param array $atts {
+	 *     Attributes passed with the shortcode.
+	 *
+	 *     @type string $object                   The name of the JSON object to use when output is set to json.
+	 *     @type string $output                   The type of output to display.
+	 *                              - json           Output a JSON object to be used with custom Javascript.
+	 *                              - headlines      Display an unordered list of headlines.
+	 *                              - excerpts       Display only excerpt information in an unordered list.
+	 *                              - full           Display full content for each item.
+	 *     @type string $host                     The hostname to pull items from. Defaults to news.wsu.edu.
+	 *     @type string $site                     Overrides setting for host. Hostname and path to pull items from.
+	 *     @type string $university_category_slug The slug of a University Category from the University Taxonomy.
+	 *     @type string $site_category_slug       The slug of a Site Category. Defaults to empty.
+	 *     @type string $tag                      The slug of a tag. Defaults to empty.
+	 *     @type string $query                    Allows for a custom WP-API query. Defaults as "posts". Any
+	 *     @type int    $local_count              The number of local items to merge with the remote results.
+	 *     @type int    $count                    The number of items to pull from a feed. Defaults to the
+	 *                                            posts_per_page setting of the remote site.
+	 *     @type string $date_format              PHP Date format for the output of the item's date.
+	 *     @type int    $offset                   The number of items to offset when displaying. Used with multiple
+	 *                                            shortcode instances where one may pull in an excerpt and another
+	 *                                            may pull in the rest of the feed as headlines.
+	 *     @type string $cache_bust               Any change to this value will clear the cache and pull fresh data.
+	 * }
 	 *
 	 * @return string Data to output where the shortcode is used.
 	 */
 	public function display_wsuwp_json( $atts ) {
 		$defaults = array(
 			'object' => 'json_data',
-			'output' => 'json', // Can also be headlines, excerpts, or full
+			'output' => 'json',
 			'host' => 'news.wsu.edu',
 			'site' => '',
 			'university_category_slug' => '',
@@ -43,7 +66,7 @@ class WSU_Content_Syndicate {
 		);
 		$atts = shortcode_atts( $defaults, $atts );
 
-		// We only support queries that start with "posts"
+		// We only support queries that start with "posts".
 		if ( 'posts' !== substr( $atts['query'], 0, 5 ) ) {
 			return '<!-- wsuwp_json ERROR - query not supported -->';
 		}
@@ -70,6 +93,8 @@ class WSU_Content_Syndicate {
 			return '<!-- wsuwp_json ERROR - not a valid domain -->';
 		}
 
+		// Create a hash of all attributes to use as a cache key. If any attribute changes,
+		// then the cache will regenerate on the next load.
 		$atts_key = md5( serialize( $atts ) );
 
 		if ( $content = wp_cache_get( $atts_key, 'wsuwp_content' ) ) {
@@ -125,7 +150,7 @@ class WSU_Content_Syndicate {
 				if ( isset( $post->featured_image ) ) {
 					$subset->thumbnail = $post->featured_image->attachment_meta->sizes->{'post-thumbnail'}->url;
 				} else {
-					$subset->thubmnail = false;
+					$subset->thumbnail = false;
 				}
 
 				if ( $post->date ) {
@@ -233,8 +258,37 @@ class WSU_Content_Syndicate {
 				</ul>
 			</div>
 		<?php
-		} else {
-			// Account for full HTML output here.
+		} elseif ( 'full' === $atts['output'] ) {
+			?>
+			<div class="wsuwp-content-syndicate-wrapper">
+				<div class="wsuwp-content-syndicate-container">
+					<?php
+					$offset_x = 0;
+					foreach ( $new_data as $content ) {
+						if ( $offset_x < absint( $atts['offset'] ) ) {
+							$offset_x++;
+							continue;
+						}
+						?>
+						<div class="wsuwp-content-syndicate-full">
+							<span class="content-item-thumbnail">
+								<?php if ( $content->thumbnail ) : ?><img src="<?php echo esc_url( $content->thumbnail ); ?>"><?php endif; ?>
+							</span>
+							<span class="content-item-title"><a href="<?php echo esc_url( $content->link ); ?>"><?php echo esc_html( $content->title ); ?></a></span>
+							<span class="content-item-byline">
+								<span class="content-item-byline-date"><?php echo date( $atts['date_format'], strtotime( $content->date ) ); ?></span>
+								<span class="content-item-byline-author"><?php echo esc_html( $content->author_name ); ?></span>
+							</span>
+							<div class="content-item-content">
+								<?php echo wp_kses_post( $content->content ); ?>
+							</div>
+						</div>
+						<?php
+					}
+					?>
+				</div>
+			</div>
+			<?php
 		}
 		$content = ob_get_contents();
 		ob_end_clean();
@@ -270,7 +324,7 @@ class WSU_Content_Syndicate {
 	 */
 	public function display_wsuwp_events( $atts ) {
 		$defaults = array(
-			'output' => 'headlines', // Can also be sidebar, full
+			'output' => 'headlines',
 			'host' => 'calendar.wsu.edu',
 			'site' => '',
 			'tag' => '',
