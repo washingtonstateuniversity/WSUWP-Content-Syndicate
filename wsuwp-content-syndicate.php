@@ -84,15 +84,6 @@ class WSU_Content_Syndicate {
 			return '<!-- wsuwp_json ERROR - an empty host was supplied -->';
 		}
 
-		$host_parts = explode( '.', $site_url['host'] );
-		$host_edu = array_pop( $host_parts );
-		$host_wsu = array_pop( $host_parts );
-
-		// We only support queries for wsu.edu domains by default
-		if ( ( 'edu' !== $host_edu || 'wsu' !== $host_wsu ) && false === apply_filters( 'wsu_consyn_valid_domain', false, $site_url['host'] ) ) {
-			return '<!-- wsuwp_json ERROR - not a valid domain -->';
-		}
-
 		// Create a hash of all attributes to use as a cache key. If any attribute changes,
 		// then the cache will regenerate on the next load.
 		$atts_key = md5( serialize( $atts ) );
