@@ -26,17 +26,16 @@ class WSU_Content_Syndicate {
 	 *
 	 *     @type string $object                   The name of the JSON object to use when output is set to json.
 	 *     @type string $output                   The type of output to display.
-	 *                      - json      Output a JSON object to be used with custom Javascript.
-	 *                      - headlines Display an unordered list of headlines.
-	 *                      - excerpts  Display only excerpt information in an unordered list.
-	 *                      - full      Display full content for each item.
+	 *                              - json           Output a JSON object to be used with custom Javascript.
+	 *                              - headlines      Display an unordered list of headlines.
+	 *                              - excerpts       Display only excerpt information in an unordered list.
+	 *                              - full           Display full content for each item.
 	 *     @type string $host                     The hostname to pull items from. Defaults to news.wsu.edu.
 	 *     @type string $site                     Overrides setting for host. Hostname and path to pull items from.
-	 *
 	 *     @type string $university_category_slug The slug of a University Category from the University Taxonomy.
 	 *     @type string $site_category_slug       The slug of a Site Category. Defaults to empty.
 	 *     @type string $tag                      The slug of a tag. Defaults to empty.
-	 *     @type string $query                    Allows for a custom WP-API query. Defaults as "posts".
+	 *     @type string $query                    Allows for a custom WP-API query. Defaults as "posts". Any
 	 *     @type int    $local_count              The number of local items to merge with the remote results.
 	 *     @type int    $count                    The number of items to pull from a feed. Defaults to the
 	 *                                            posts_per_page setting of the remote site.
