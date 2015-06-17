@@ -233,8 +233,37 @@ class WSU_Content_Syndicate {
 				</ul>
 			</div>
 		<?php
-		} else {
-			// Account for full HTML output here.
+		} elseif ( 'full' === $atts['output'] ) {
+			?>
+			<div class="wsuwp-content-syndicate-wrapper">
+				<div class="wsuwp-content-syndicate-container">
+					<?php
+					$offset_x = 0;
+					foreach ( $new_data as $content ) {
+						if ( $offset_x < absint( $atts['offset'] ) ) {
+							$offset_x++;
+							continue;
+						}
+						?>
+						<div class="wsuwp-content-syndicate-full">
+							<span class="content-item-thumbnail">
+								<?php if ( $content->thumbnail ) : ?><img src="<?php echo esc_url( $content->thumbnail ); ?>"><?php endif; ?>
+							</span>
+							<span class="content-item-title"><a href="<?php echo esc_url( $content->link ); ?>"><?php echo esc_html( $content->title ); ?></a></span>
+							<span class="content-item-byline">
+								<span class="content-item-byline-date"><?php echo date( $atts['date_format'], strtotime( $content->date ) ); ?></span>
+								<span class="content-item-byline-author"><?php echo esc_html( $content->author_name ); ?></span>
+							</span>
+							<div class="content-item-content">
+								<?php echo wp_kses_post( $content->content ); ?>
+							</div>
+						</div>
+						<?php
+					}
+					?>
+				</div>
+			</div>
+			<?php
 		}
 		$content = ob_get_contents();
 		ob_end_clean();
