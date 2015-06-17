@@ -21,14 +21,38 @@ class WSU_Content_Syndicate {
 	 * Process the requested parameters for use with the WordPress JSON API and output
 	 * the response accordingly.
 	 *
-	 * @param array $atts Attributes passed with the shortcode.
+	 * @param array $atts {
+	 *     Attributes passed with the shortcode.
+	 *
+	 *     @type string $object                   The name of the JSON object to use when output is set to json.
+	 *     @type string $output                   The type of output to display.
+	 *                      - json      Output a JSON object to be used with custom Javascript.
+	 *                      - headlines Display an unordered list of headlines.
+	 *                      - excerpts  Display only excerpt information in an unordered list.
+	 *                      - full      Display full content for each item.
+	 *     @type string $host                     The hostname to pull items from. Defaults to news.wsu.edu.
+	 *     @type string $site                     Overrides setting for host. Hostname and path to pull items from.
+	 *
+	 *     @type string $university_category_slug The slug of a University Category from the University Taxonomy.
+	 *     @type string $site_category_slug       The slug of a Site Category. Defaults to empty.
+	 *     @type string $tag                      The slug of a tag. Defaults to empty.
+	 *     @type string $query                    Allows for a custom WP-API query. Defaults as "posts".
+	 *     @type int    $local_count              The number of local items to merge with the remote results.
+	 *     @type int    $count                    The number of items to pull from a feed. Defaults to the
+	 *                                            posts_per_page setting of the remote site.
+	 *     @type string $date_format              PHP Date format for the output of the item's date.
+	 *     @type int    $offset                   The number of items to offset when displaying. Used with multiple
+	 *                                            shortcode instances where one may pull in an excerpt and another
+	 *                                            may pull in the rest of the feed as headlines.
+	 *     @type string $cache_bust               Any change to this value will clear the cache and pull fresh data.
+	 * }
 	 *
 	 * @return string Data to output where the shortcode is used.
 	 */
 	public function display_wsuwp_json( $atts ) {
 		$defaults = array(
 			'object' => 'json_data',
-			'output' => 'json', // Can also be headlines, excerpts, or full
+			'output' => 'json',
 			'host' => 'news.wsu.edu',
 			'site' => '',
 			'university_category_slug' => '',
