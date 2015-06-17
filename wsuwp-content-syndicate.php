@@ -125,7 +125,7 @@ class WSU_Content_Syndicate {
 				if ( isset( $post->featured_image ) ) {
 					$subset->thumbnail = $post->featured_image->attachment_meta->sizes->{'post-thumbnail'}->url;
 				} else {
-					$subset->thubmnail = false;
+					$subset->thumbnail = false;
 				}
 
 				if ( $post->date ) {
