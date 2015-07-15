@@ -30,16 +30,8 @@ class WSU_Syndicate_Shortcode_Events extends WSU_Syndicate_Shortcode_Base {
 		);
 		$atts = shortcode_atts( $defaults, $atts );
 
-		if ( ! empty( $atts['site'] ) ) {
-			$site_url = trailingslashit( esc_url( $atts['site'] ) );
-		} else {
-			$site_url = trailingslashit( esc_url( $atts['host'] ) );
-		}
-
-		$site_url = parse_url( $site_url );
-
-		if ( empty( $site_url['host'] ) ) {
-			return '<!-- wsuwp_json ERROR - an empty host was supplied -->';
+		if ( ! $site_url = $this->get_request_url( $atts ) ) {
+			return '<!-- wsuwp_events ERROR - an empty host was supplied -->';
 		}
 
 		$host_parts = explode( '.', $site_url['host'] );

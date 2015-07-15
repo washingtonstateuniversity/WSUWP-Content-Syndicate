@@ -58,4 +58,28 @@ class WSU_Syndicate_Shortcode_Base {
 
 		wp_cache_set( $atts_key, $content, $shortcode, 600 );
 	}
+
+	/**
+	 * Determine what the base URL should be used for REST API data.
+	 *
+	 * @param array $atts List of attributes used for the shortcode.
+	 *
+	 * @return bool|array host and path if available, false if not.
+	 */
+	public function get_request_url( $atts ) {
+		// If a site attribute is provided, it overrides the host attribute.
+		if ( ! empty( $atts['site'] ) ) {
+			$site_url = trailingslashit( esc_url( $atts['site'] ) );
+		} else {
+			$site_url = trailingslashit( esc_url( $atts['host'] ) );
+		}
+
+		$site_url = parse_url( $site_url );
+
+		if ( empty( $site_url['host'] ) ) {
+			return false;
+		}
+
+		return $site_url;
+	}
 }

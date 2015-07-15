@@ -61,16 +61,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 		);
 		$atts = shortcode_atts( $defaults, $atts );
 
-		// If a site attribute is provided, it overrides the host attribute.
-		if ( ! empty( $atts['site'] ) ) {
-			$site_url = trailingslashit( esc_url( $atts['site'] ) );
-		} else {
-			$site_url = trailingslashit( esc_url( $atts['host'] ) );
-		}
-
-		$site_url = parse_url( $site_url );
-
-		if ( empty( $site_url['host'] ) ) {
+		if ( ! $site_url = $this->get_request_url( $atts ) ) {
 			return '<!-- wsuwp_json ERROR - an empty host was supplied -->';
 		}
 
