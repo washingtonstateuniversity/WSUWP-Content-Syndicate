@@ -61,11 +61,6 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 		);
 		$atts = shortcode_atts( $defaults, $atts );
 
-		// We only support queries that start with "posts".
-		if ( 'posts' !== substr( $atts['query'], 0, 5 ) ) {
-			return '<!-- wsuwp_json ERROR - query not supported -->';
-		}
-
 		// If a site attribute is provided, it overrides the host attribute.
 		if ( ! empty( $atts['site'] ) ) {
 			$site_url = trailingslashit( esc_url( $atts['site'] ) );
