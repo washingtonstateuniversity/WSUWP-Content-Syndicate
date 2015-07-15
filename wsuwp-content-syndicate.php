@@ -125,10 +125,10 @@ class WSU_Content_Syndicate {
 			foreach( $data as $post ) {
 				$subset = new StdClass();
 				$subset->ID = $post->id;
-				$subset->title = $post->title;
+				$subset->title = $post->title->rendered;
 				$subset->link = $post->link;
-				$subset->excerpt = $post->excerpt;
-				$subset->content = $post->content;
+				$subset->excerpt = $post->excerpt->rendered;
+				$subset->content = $post->content->rendered;
 				$subset->date = $post->date;
 
 				$subset->author_id = $post->author;
