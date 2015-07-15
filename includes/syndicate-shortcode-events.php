@@ -34,15 +34,6 @@ class WSU_Syndicate_Shortcode_Events extends WSU_Syndicate_Shortcode_Base {
 			return '<!-- wsuwp_events ERROR - an empty host was supplied -->';
 		}
 
-		$host_parts = explode( '.', $site_url['host'] );
-		$host_edu = array_pop( $host_parts );
-		$host_wsu = array_pop( $host_parts );
-
-		// We only support queries for wsu.edu domains by default
-		if ( ( ! in_array( $host_edu, array( 'edu', 'dev' ) ) || 'wsu' !== $host_wsu ) && false === apply_filters( 'wsu_consyn_valid_domain', false, $site_url['host'] ) ) {
-			return '<!-- wsuwp_json ERROR - not a valid domain -->';
-		}
-
 		// Retrieve existing content from cache if available.
 		if ( $content = $this->get_content_cache( $atts, 'wsuwp_events' ) ) {
 			return apply_filters( 'wsuwp_content_syndicate_json', $content, $atts );
