@@ -138,7 +138,7 @@ class WSU_Content_Syndicate {
 				$subset->date = $post->date;
 				$subset->author_name = $post->author->name;
 				$subset->author_avatar = $post->author->avatar;
-				if ( isset( $post->featured_image ) ) {
+				if ( isset( $post->featured_image ) && ! isset( $post->featured_image->errors ) ) {
 					$subset->thumbnail = $post->featured_image->attachment_meta->sizes->{'post-thumbnail'}->url;
 				} else {
 					$subset->thumbnail = false;
