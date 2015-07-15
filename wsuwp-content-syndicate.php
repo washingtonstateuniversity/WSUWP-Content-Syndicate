@@ -124,7 +124,7 @@ class WSU_Content_Syndicate {
 			$data = json_decode( $data );
 			foreach( $data as $post ) {
 				$subset = new StdClass();
-				$subset->ID = $post->ID;
+				$subset->ID = $post->id;
 				$subset->title = $post->title;
 				$subset->link = $post->link;
 				$subset->excerpt = $post->excerpt;
@@ -379,7 +379,7 @@ class WSU_Content_Syndicate {
 
 			foreach( $data as $post ) {
 				$subset = new StdClass();
-				$subset->ID = $post->ID;
+				$subset->ID = $post->id;
 				$subset->title = $post->title;
 				$subset->link = $post->link;
 				$subset->excerpt = $post->excerpt;
