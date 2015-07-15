@@ -57,7 +57,7 @@ class WSU_Content_Syndicate {
 			'university_category_slug' => '',
 			'site_category_slug' => '',
 			'tag' => '',
-			'query' => 'posts',
+			'query' => 'wp/v2/posts',
 			'local_count' => 0,
 			'count' => false,
 			'date_format' => 'F j, Y',
@@ -65,11 +65,6 @@ class WSU_Content_Syndicate {
 			'cache_bust' => '',
 		);
 		$atts = shortcode_atts( $defaults, $atts );
-
-		// We only support queries that start with "posts".
-		if ( 'posts' !== substr( $atts['query'], 0, 5 ) ) {
-			return '<!-- wsuwp_json ERROR - query not supported -->';
-		}
 
 		// If a site attribute is provided, it overrides the host attribute.
 		if ( ! empty( $atts['site'] ) ) {
@@ -129,17 +124,23 @@ class WSU_Content_Syndicate {
 			$data = json_decode( $data );
 			foreach( $data as $post ) {
 				$subset = new StdClass();
-				$subset->ID = $post->ID;
-				$subset->title = $post->title;
+				$subset->ID = $post->id;
+				$subset->title = $post->title->rendered;
 				$subset->link = $post->link;
-				$subset->excerpt = $post->excerpt;
-				$subset->content = $post->content;
-				$subset->terms = $post->terms;
+				$subset->excerpt = $post->excerpt->rendered;
+				$subset->content = $post->content->rendered;
 				$subset->date = $post->date;
-				$subset->author_name = $post->author->name;
-				$subset->author_avatar = $post->author->avatar;
-				if ( isset( $post->featured_image ) ) {
-					$subset->thumbnail = $post->featured_image->attachment_meta->sizes->{'post-thumbnail'}->url;
+
+				$subset->author_id = $post->author;
+				$subset->author_link = $post->_links->author[0]->href;
+
+				$author_data = $this->retrieve_author_data( $subset->author_id, $subset->author_link, $atts['host'] );
+
+				$subset->author_name = $author_data['name'];
+				$subset->author_avatar = $author_data['avatar'];
+
+				if ( isset( $post->featured_image ) && 0 < $post->featured_image ) {
+					$subset->thumbnail = $this->retrieve_post_thumbnail( $post->featured_image, $site_url['host'] . $site_url['path'] );
 				} else {
 					$subset->thumbnail = false;
 				}
@@ -177,7 +178,6 @@ class WSU_Content_Syndicate {
 				$subset_content = wpautop( $subset_content[0] );
 
 				$subset->content = apply_filters( 'the_content', $subset_content );
-				$subset->terms = array();
 				$subset->author_name = get_the_author();
 				$subset->author_avatar = '';
 
@@ -292,6 +292,96 @@ class WSU_Content_Syndicate {
 	}
 
 	/**
+	 * Retrieve individual author data from the current site's cache or from
+	 * the host site's REST API if no cached value is available.
+	 *
+	 * @param int    $user_id      The user ID of the author.
+	 * @param string $user_api_url The URL given by the API for the author from a previous request.
+	 * @param string $hostname     The hostname attached to the author.
+	 *
+	 * @return array The author's name and avatar URL.
+	 */
+	public function retrieve_author_data( $user_id, $user_api_url, $hostname ) {
+		$existing_user_data = wp_cache_get( $hostname . '_api_users' );
+
+		if ( ! is_array( $existing_user_data ) ) {
+			$existing_user_data = array();
+		}
+
+		if ( isset( $existing_user_data[ $user_id ] ) ) {
+			return $existing_user_data[ $user_id ];
+		}
+
+		$response = wp_remote_get( $user_api_url );
+
+		if ( is_wp_error( $response ) ) {
+			return array( 'name' => '', 'avatar' => '' );
+		}
+
+		$data = wp_remote_retrieve_body( $response );
+
+		if ( ! empty( $data ) ) {
+			$data = json_decode( $data );
+			if ( isset( $data->name ) ) {
+				$existing_user_data[ $user_id ]['name'] = $data->name;
+			} else {
+				$existing_user_data[ $user_id ]['name'] = '';
+			}
+
+			if ( isset( $data->avatar_urls ) && isset( $data->avatar_urls->{96} ) ) {
+				$existing_user_data[ $user_id ]['avatar'] = $data->avatar_urls->{96};
+			} else {
+				$existing_user_data[ $user_id ]['avatar'] = '';
+			}
+
+			wp_cache_set( $hostname . '_api_users', $existing_user_data );
+
+			return $existing_user_data[ $user_id ];
+		}
+
+		return array( 'name' => '', 'avatar' => '' );
+	}
+
+	/**
+	 * Retrieve post thumbnail data for individual posts retrieved over the REST API.
+	 *
+	 * @param int    $media_id The ID of the featured image.
+	 * @param string $site_url The full URL of the site.
+	 *
+	 * @return string The URL of a featured image or an empty string.
+	 */
+	public function retrieve_post_thumbnail( $media_id, $site_url ) {
+		if ( 0 === absint( $media_id ) ) {
+			return '';
+		}
+
+		if ( defined( 'WSU_LOCAL_CONFIG' ) && WSU_LOCAL_CONFIG ) {
+			$scheme = 'http://';
+		} else {
+			$scheme = 'https://';
+		}
+		$url = esc_url( $scheme . $site_url . 'wp-json/wp/v2/media/' . $media_id );
+
+		$response = wp_remote_get( $url );
+
+		if ( is_wp_error( $response ) ) {
+			return '';
+		}
+
+		$data = wp_remote_retrieve_body( $response );
+
+		$data = json_decode( $data );
+
+		if ( is_array( $data ) ) {
+			return '';
+		}
+
+		$data = $data->media_details->sizes->{'post-thumbnail'}->source_url;
+
+		return $data;
+	}
+
+	/**
 	 * Process the requested parameters for use with WSU Search via Elasticsearch and output
 	 * the response accordingly.
 	 *
@@ -384,12 +474,11 @@ class WSU_Content_Syndicate {
 
 			foreach( $data as $post ) {
 				$subset = new StdClass();
-				$subset->ID = $post->ID;
+				$subset->ID = $post->id;
 				$subset->title = $post->title;
 				$subset->link = $post->link;
 				$subset->excerpt = $post->excerpt;
 				$subset->content = $post->content;
-				$subset->terms = $post->terms;
 				$subset->date = $post->date;
 
 				// Custom data added to events by WSUWP Extended Events Calendar
