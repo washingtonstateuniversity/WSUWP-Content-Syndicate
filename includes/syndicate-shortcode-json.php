@@ -79,11 +79,8 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 			return '<!-- wsuwp_json ERROR - an empty host was supplied -->';
 		}
 
-		// Create a hash of all attributes to use as a cache key. If any attribute changes,
-		// then the cache will regenerate on the next load.
-		$atts_key = md5( serialize( $atts ) );
-
-		if ( $content = wp_cache_get( $atts_key, 'wsuwp_content' ) ) {
+		// Retrieve existing content from cache if available.
+		if ( $content = $this->get_content_cache( $atts, 'wsuwp_json' ) ) {
 			return apply_filters( 'wsuwp_content_syndicate_json', $content, $atts );
 		}
 
@@ -279,7 +276,8 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 		$content = ob_get_contents();
 		ob_end_clean();
 
-		wp_cache_add( $atts_key, $content, 'wsuwp_content', 600 );
+		// Store the built content in cache for repeated use.
+		$this->set_content_cache( $atts, 'wsuwp_json', $content );
 
 		$content = apply_filters( 'wsuwp_content_syndicate_json', $content, $atts );
 

@@ -51,9 +51,8 @@ class WSU_Syndicate_Shortcode_Events extends WSU_Syndicate_Shortcode_Base {
 			return '<!-- wsuwp_json ERROR - not a valid domain -->';
 		}
 
-		$atts_key = md5( serialize( $atts ) );
-
-		if ( $content = wp_cache_get( $atts_key, 'wsuwp_content' ) ) {
+		// Retrieve existing content from cache if available.
+		if ( $content = $this->get_content_cache( $atts, 'wsuwp_events' ) ) {
 			return apply_filters( 'wsuwp_content_syndicate_json', $content, $atts );
 		}
 
@@ -135,7 +134,8 @@ class WSU_Syndicate_Shortcode_Events extends WSU_Syndicate_Shortcode_Base {
 		$content = ob_get_contents();
 		ob_end_clean();
 
-		wp_cache_add( $atts_key, $content, 'wsuwp_content', 600 );
+		// Store the built content in cache for repeated use.
+		$this->set_content_cache( $atts, 'wsuwp_events', $content );
 
 		$content = apply_filters( 'wsuwp_content_syndicate_json', $content, $atts );
 
