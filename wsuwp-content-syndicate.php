@@ -57,7 +57,7 @@ class WSU_Content_Syndicate {
 			'university_category_slug' => '',
 			'site_category_slug' => '',
 			'tag' => '',
-			'query' => 'posts',
+			'query' => 'wp/v2/posts',
 			'local_count' => 0,
 			'count' => false,
 			'date_format' => 'F j, Y',
