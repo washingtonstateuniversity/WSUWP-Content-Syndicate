@@ -13,7 +13,6 @@ class WSU_Content_Syndicate {
 	 */
 	public function __construct() {
 		add_shortcode( 'wsuwp_json', array( $this, 'display_wsuwp_json' ) );
-		add_shortcode( 'wsuwp_elastic', array( $this, 'display_wsuwp_elastic' ) );
 		add_shortcode( 'wsuwp_events', array( $this, 'display_wsuwp_events' ) );
 	}
 
@@ -287,21 +286,6 @@ class WSU_Content_Syndicate {
 		wp_cache_add( $atts_key, $content, 'wsuwp_content', 600 );
 
 		$content = apply_filters( 'wsuwp_content_syndicate_json', $content, $atts );
-
-		return $content;
-	}
-
-	/**
-	 * Process the requested parameters for use with WSU Search via Elasticsearch and output
-	 * the response accordingly.
-	 *
-	 * @return string
-	 */
-	public function display_wsuwp_elastic() {
-		ob_start();
-
-		$content = ob_get_contents();
-		ob_end_clean();
 
 		return $content;
 	}
