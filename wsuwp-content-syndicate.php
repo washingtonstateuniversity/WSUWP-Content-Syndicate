@@ -139,8 +139,8 @@ class WSU_Content_Syndicate {
 				$subset->author_name = $author_data['name'];
 				$subset->author_avatar = $author_data['avatar'];
 
-				if ( isset( $post->featured_image ) && ! isset( $post->featured_image->errors ) ) {
-					$subset->thumbnail = $post->featured_image->attachment_meta->sizes->{'post-thumbnail'}->url;
+				if ( isset( $post->featured_image ) && 0 < $post->featured_image ) {
+					$subset->thumbnail = $this->retrieve_post_thumbnail( $post->featured_image, $site_url['host'] . $site_url['path'] );
 				} else {
 					$subset->thumbnail = false;
 				}
@@ -340,6 +340,45 @@ class WSU_Content_Syndicate {
 		}
 
 		return array( 'name' => '', 'avatar' => '' );
+	}
+
+	/**
+	 * Retrieve post thumbnail data for individual posts retrieved over the REST API.
+	 *
+	 * @param int    $media_id The ID of the featured image.
+	 * @param string $site_url The full URL of the site.
+	 *
+	 * @return string The URL of a featured image or an empty string.
+	 */
+	public function retrieve_post_thumbnail( $media_id, $site_url ) {
+		if ( 0 === absint( $media_id ) ) {
+			return '';
+		}
+
+		if ( defined( 'WSU_LOCAL_CONFIG' ) && WSU_LOCAL_CONFIG ) {
+			$scheme = 'http://';
+		} else {
+			$scheme = 'https://';
+		}
+		$url = esc_url( $scheme . $site_url . 'wp-json/wp/v2/media/' . $media_id );
+
+		$response = wp_remote_get( $url );
+
+		if ( is_wp_error( $response ) ) {
+			return '';
+		}
+
+		$data = wp_remote_retrieve_body( $response );
+
+		$data = json_decode( $data );
+
+		if ( is_array( $data ) ) {
+			return '';
+		}
+
+		$data = $data->media_details->sizes->{'post-thumbnail'}->source_url;
+
+		return $data;
 	}
 
 	/**
