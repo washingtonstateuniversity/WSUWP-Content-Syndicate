@@ -129,7 +129,6 @@ class WSU_Content_Syndicate {
 				$subset->link = $post->link;
 				$subset->excerpt = $post->excerpt;
 				$subset->content = $post->content;
-				$subset->terms = $post->terms;
 				$subset->date = $post->date;
 				$subset->author_name = $post->author->name;
 				$subset->author_avatar = $post->author->avatar;
@@ -172,7 +171,6 @@ class WSU_Content_Syndicate {
 				$subset_content = wpautop( $subset_content[0] );
 
 				$subset->content = apply_filters( 'the_content', $subset_content );
-				$subset->terms = array();
 				$subset->author_name = get_the_author();
 				$subset->author_avatar = '';
 
@@ -384,7 +382,6 @@ class WSU_Content_Syndicate {
 				$subset->link = $post->link;
 				$subset->excerpt = $post->excerpt;
 				$subset->content = $post->content;
-				$subset->terms = $post->terms;
 				$subset->date = $post->date;
 
 				// Custom data added to events by WSUWP Extended Events Calendar
