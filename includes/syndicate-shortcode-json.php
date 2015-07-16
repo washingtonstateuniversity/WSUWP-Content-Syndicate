@@ -44,22 +44,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 	 * @return string Data to output where the shortcode is used.
 	 */
 	public function display_shortcode( $atts ) {
-		$defaults = array(
-			'object' => 'json_data',
-			'output' => 'json',
-			'host' => 'news.wsu.edu',
-			'site' => '',
-			'university_category_slug' => '',
-			'site_category_slug' => '',
-			'tag' => '',
-			'query' => 'posts',
-			'local_count' => 0,
-			'count' => false,
-			'date_format' => 'F j, Y',
-			'offset' => 0,
-			'cache_bust' => '',
-		);
-		$atts = shortcode_atts( $defaults, $atts );
+		$atts = shortcode_atts( $this->defaults_atts, $atts );
 
 		if ( ! $site_url = $this->get_request_url( $atts ) ) {
 			return '<!-- wsuwp_json ERROR - an empty host was supplied -->';
