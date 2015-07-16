@@ -58,10 +58,47 @@ class WSU_Syndicate_Shortcode_People extends WSU_Syndicate_Shortcode_Base {
 			return '';
 		}
 
+		$content = '<div class="wsuwp-people-wrapper">';
+
 		$people = json_decode( $data );
 
 		foreach ( $people as $person ) {
-			// Capture individual person information.
+			$content .= $this->generate_item_html( $person, $atts['output'] );
+		}
+
+		$content .= '</div><!-- end wsuwp-people-wrapper -->';
+
+		return $content;
+	}
+
+	/**
+	 * Generate the HTML used for individual people when called with the shortcode.
+	 *
+	 * @param stdClass $person Data returned from the WP REST API.
+	 * @param string   $type   The type of output expected.
+	 *
+	 * @return string The generated HTML for an individual person.
+	 */
+	private function generate_item_html( $person, $type ) {
+		if ( 'basic' === $type ) {
+			ob_start();
+			?>
+			<div class="wsuwp-person-container">
+				<?php if ( isset( $person->profile_photo ) && $person->profile_photo ) : ?>
+				<figure class="wsuwp-person-photo">
+					<img src="<?php echo esc_url( $person->profile_photo ); ?>" />
+				</figure>
+				<?php endif; ?>
+				<div class="wsuwp-person-name"><?php echo esc_html( $person->title ); ?></div>
+				<div class="wsuwp-person-position"><?php echo esc_html( $person->position_title ); ?></div>
+				<div class="wsuwp-person-office"><?php echo esc_html( $person->office ); ?></div>
+				<div class="wsuwp-person-email"><?php echo esc_html( $person->email ); ?></div>
+			</div>
+			<?php
+			$html = ob_get_contents();
+			ob_end_clean();
+
+			return $html;
 		}
 
 		return '';
