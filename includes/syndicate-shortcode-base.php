@@ -82,4 +82,35 @@ class WSU_Syndicate_Shortcode_Base {
 
 		return $site_url;
 	}
+
+	/**
+	 * Add proper filters to a given URL to handle lookup by University taxonomies and
+	 * built in WordPress taxonomies.
+	 *
+	 * @param array  $atts        List of attributes used for the shortcode.
+	 * @param string $request_url REST API URL being built.
+	 *
+	 * @return string Modified REST API URL.
+	 */
+	public function build_taxonomy_filters( $atts, $request_url ) {
+		if ( ! empty( $atts['university_category_slug'] ) ) {
+			$request_url = add_query_arg( array(
+				'filter[taxonomy]' => 'wsuwp_university_category',
+				'filter[term]' => sanitize_key( $atts['university_category_slug'] )
+			), $request_url );
+		}
+
+		if ( ! empty( $atts['site_category_slug'] ) ) {
+			$request_url = add_query_arg( array(
+				'filter[taxonomy]' => 'category',
+				'filter[term]' => sanitize_key( $atts['site_category_slug'] )
+			), $request_url );
+		}
+
+		if ( ! empty( $atts['tag'] ) ) {
+			$request_url = add_query_arg( array( 'filter[tag]' => sanitize_key( $atts['tag'] ) ), $request_url );
+		}
+
+		return $request_url;
+	}
 }

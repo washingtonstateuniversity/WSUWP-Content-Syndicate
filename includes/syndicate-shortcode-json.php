@@ -72,23 +72,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 
 		$request_url = esc_url( $site_url['host'] . $site_url['path'] . 'wp-json/' ) . $atts['query'];
 
-		if ( ! empty( $atts['university_category_slug'] ) ) {
-			$request_url = add_query_arg( array(
-				'filter[taxonomy]' => 'wsuwp_university_category',
-				'filter[term]' => sanitize_key( $atts['university_category_slug'] )
-			), $request_url );
-		}
-
-		if ( ! empty( $atts['site_category_slug'] ) ) {
-			$request_url = add_query_arg( array(
-				'filter[taxonomy]' => 'category',
-				'filter[term]' => sanitize_key( $atts['site_category_slug'] )
-			), $request_url );
-		}
-
-		if ( ! empty( $atts['tag'] ) ) {
-			$request_url = add_query_arg( array( 'filter[tag]' => sanitize_key( $atts['tag'] ) ), $request_url );
-		}
+		$request_url = $this->build_taxonomy_filters( $request_url, $atts );
 
 		if ( ! empty( $atts['offset'] ) ) {
 			$atts['count'] = absint( $atts['count'] ) + absint( $atts['offset'] );
