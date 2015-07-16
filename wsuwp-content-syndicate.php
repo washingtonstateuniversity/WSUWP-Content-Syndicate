@@ -40,9 +40,11 @@ class WSU_Content_Syndicate {
 	public function activate_shortcodes() {
 		require_once( dirname( __FILE__ ) . '/includes/syndicate-shortcode-base.php' );
 		require_once( dirname( __FILE__ ) . '/includes/syndicate-shortcode-json.php' );
+		require_once( dirname( __FILE__ ) . '/includes/syndicate-shortcode-people.php' );
 		require_once( dirname( __FILE__ ) . '/includes/syndicate-shortcode-events.php' );
 
 		new WSU_Syndicate_Shortcode_JSON();
+		new WSU_Syndicate_Shortcode_People();
 		new WSU_Syndicate_Shortcode_Events();
 	}
 }
