@@ -1,10 +1,14 @@
 <?php
 
 class WSU_Syndicate_Shortcode_People extends WSU_Syndicate_Shortcode_Base {
+	/**
+	 * @var array A list of defaults specific to people that will override the
+	 *            base defaults set for all syndicate shortcodes.
+	 */
 	public $local_default_atts = array(
 		'output' => 'basic',
 		'host'   => 'people.wsu.edu',
-		'query'  => '',
+		'query'  => 'posts/?type=wsuwp_people_profile',
 	);
 
 	public function __construct() {
