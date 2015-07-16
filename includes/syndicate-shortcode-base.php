@@ -6,6 +6,22 @@
  * Class WSU_Syndicate_Shortcode_Base
  */
 class WSU_Syndicate_Shortcode_Base {
+	public $defaults_atts = array(
+		'object' => 'json_data',
+		'output' => 'json',
+		'host' => 'news.wsu.edu',
+		'site' => '',
+		'university_category_slug' => '',
+		'site_category_slug' => '',
+		'tag' => '',
+		'query' => 'posts',
+		'local_count' => 0,
+		'count' => false,
+		'date_format' => 'F j, Y',
+		'offset' => 0,
+		'cache_bust' => '',
+	);
+
 	/**
 	 * A common constructor that initiates the shortcode.
 	 */
