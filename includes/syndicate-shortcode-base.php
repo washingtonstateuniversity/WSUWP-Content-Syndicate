@@ -6,6 +6,11 @@
  * Class WSU_Syndicate_Shortcode_Base
  */
 class WSU_Syndicate_Shortcode_Base {
+	/**
+	 * Default attributes applied to all shortcodes that extend this base.
+	 *
+	 * @var array
+	 */
 	public $defaults_atts = array(
 		'object' => 'json_data',
 		'output' => 'json',
@@ -21,6 +26,21 @@ class WSU_Syndicate_Shortcode_Base {
 		'offset' => 0,
 		'cache_bust' => '',
 	);
+
+	/**
+	 * Defaults for individual base attributes can be overridden for a
+	 * specific shortcode.
+	 *
+	 * @var array
+	 */
+	public $local_default_atts = array();
+
+	/**
+	 * Defaults can be extended with additional keys by a specific shortcode.
+	 *
+	 * @var array
+	 */
+	public $local_extended_atts = array();
 
 	/**
 	 * A common constructor that initiates the shortcode.
@@ -43,6 +63,21 @@ class WSU_Syndicate_Shortcode_Base {
 	 */
 	public function display_shortcode( $atts ) {
 		return '';
+	}
+
+	/**
+	 * Process passed attributes for a shortcode against arrays of base defaults,
+	 * local defaults, and extended local defaults.
+	 *
+	 * @param array $atts Attributes passed to a shortcode.
+	 *
+	 * @return array Fully populated list of attributes expected by the shortcode.
+	 */
+	public function process_attributes( $atts ) {
+		$defaults = shortcode_atts( $this->defaults_atts, $this->local_default_atts );
+		$defaults = $defaults + $this->local_extended_atts;
+
+		return shortcode_atts( $defaults, $atts );
 	}
 
 	/**

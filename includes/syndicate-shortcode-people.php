@@ -28,8 +28,7 @@ class WSU_Syndicate_Shortcode_People extends WSU_Syndicate_Shortcode_Base {
 	 * @return string Content to display in place of the shortcode.
 	 */
 	public function display_shortcode( $atts ) {
-		$default_atts = shortcode_atts( $this->defaults_atts, $this->local_default_atts );
-		$atts         = shortcode_atts( $default_atts, $atts );
+		$atts = $this->process_attributes( $atts );
 
 		if ( ! $site_url = $this->get_request_url( $atts ) ) {
 			return '<!-- wsuwp_people ERROR - an empty host was supplied -->';

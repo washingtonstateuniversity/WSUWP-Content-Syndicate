@@ -1,6 +1,23 @@
 <?php
 
 class WSU_Syndicate_Shortcode_Events extends WSU_Syndicate_Shortcode_Base {
+	/**
+	 * @var array Overriding attributes applied to the base defaults.
+	 */
+	public $local_default_atts = array(
+		'output'      => 'headlines',
+		'host'        => 'calendar.wsu.edu',
+		'query'       => 'posts/?type=tribe_events',
+		'date_format' => 'M j',
+	);
+
+	/**
+	 * @var array A set of default attributes for this shortcode only.
+	 */
+	public $local_extended_atts = array(
+		'category' => '',
+	);
+
 	public function __construct() {
 		parent::construct();
 	}
@@ -17,18 +34,7 @@ class WSU_Syndicate_Shortcode_Events extends WSU_Syndicate_Shortcode_Base {
 	 * @return string
 	 */
 	public function display_shortcode( $atts ) {
-		$defaults = array(
-			'output' => 'headlines',
-			'host' => 'calendar.wsu.edu',
-			'site' => '',
-			'tag' => '',
-			'category' => '',
-			'query' => 'posts/?type=tribe_events',
-			'count' => false,
-			'date_format' => 'M j',
-			'cache_bust' => '',
-		);
-		$atts = shortcode_atts( $defaults, $atts );
+		$atts = $this->process_attributes( $atts );
 
 		if ( ! $site_url = $this->get_request_url( $atts ) ) {
 			return '<!-- wsuwp_events ERROR - an empty host was supplied -->';
