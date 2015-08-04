@@ -67,6 +67,8 @@ class WSU_Syndicate_Shortcode_People extends WSU_Syndicate_Shortcode_Base {
 
 		$content .= '</div><!-- end wsuwp-people-wrapper -->';
 
+		$this->set_content_cache( $atts, 'wsuwp_people', $content );
+
 		return $content;
 	}
 
