@@ -102,6 +102,6 @@ class WSU_Syndicate_Shortcode_People extends WSU_Syndicate_Shortcode_Base {
 			return $html;
 		}
 
-		return '';
+		return apply_filters( 'wsuwp_people_item_html', '', $person );
 	}
 }
