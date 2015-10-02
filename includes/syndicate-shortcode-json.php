@@ -75,7 +75,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 		if ( ! empty( $data ) ) {
 			$data = json_decode( $data );
 
-			if ( ! is_array( $data ) || ! is_object( $data ) ) {
+			if ( ! is_array( $data ) && ! is_object( $data ) ) {
 				if ( is_wp_error( $data ) ) {
 					$error_msg = $data->get_error_message();
 					error_log( 'WSUWP Content Syndicate: Data is WP_Error. ' . esc_attr( $error_msg ) );
