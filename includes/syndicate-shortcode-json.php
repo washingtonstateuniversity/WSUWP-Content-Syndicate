@@ -126,7 +126,16 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 				$subset->title = get_the_title();
 				$subset->link = get_the_permalink();
 				$subset->excerpt = get_the_excerpt();
-				$subset->thumbnail = get_the_post_thumbnail( get_the_ID(), 'post-thumbnail' );
+
+				$subset->thumbnail = false;
+				// Retrieve the source URL for any featured image assigned to the post.
+				$post_thumbnail_id = get_post_thumbnail_id( get_the_ID() );
+				if ( 0 < absint( $post_thumbnail_id ) ) {
+					$post_thumbnail_src = wp_get_attachment_image_src( $post_thumbnail_id, 'post-thumbnail' );
+					if ( $post_thumbnail_src ) {
+						$subset->thumbnail = $post_thumbnail_src[0];
+					}
+				}
 
 				// Split the content to display an excerpt marked by a more tag.
 				$subset_content = get_the_content();
