@@ -101,6 +101,17 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 					$subset->thumbnail = false;
 				}
 
+				/**
+				 * Filter the data stored for an individual result after defaults have been built.
+				 *
+				 * @since 0.7.10
+				 *
+				 * @param object $subset Data attached to this result.
+				 * @param object $post   Data for an individual post retrieved via `wp-json/posts` from a remote host.
+				 * @param array  $atts   Attributes originally passed to the `wsuwp_json` shortcode.
+				 */
+				$subset = apply_filters( 'wsu_content_syndicate_host_data', $subset, $post, $atts );
+
 				if ( $post->date ) {
 					$subset_key = strtotime( $post->date );
 				} else {
