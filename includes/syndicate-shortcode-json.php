@@ -158,6 +158,16 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 				$subset->author_name = get_the_author();
 				$subset->author_avatar = '';
 
+				/**
+				 * Filter the data stored for an individual local result after defaults have been built.
+				 *
+				 * @since 0.7.10
+				 *
+				 * @param object $subset Data attached to this result. Corresponds to a local post.
+				 * @param array  $atts   Attributes originally passed to the `wsuwp_json` shortcode.
+				 */
+				$subset = apply_filters( 'wsu_content_syndicate_host_data', $subset, $atts );
+
 				$subset_key = get_the_date( 'U' );
 				while ( array_key_exists( $subset_key, $new_data ) ) {
 					$subset_key++;
