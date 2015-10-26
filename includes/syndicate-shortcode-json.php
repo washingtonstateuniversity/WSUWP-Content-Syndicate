@@ -166,7 +166,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 				 * @param object $subset Data attached to this result. Corresponds to a local post.
 				 * @param array  $atts   Attributes originally passed to the `wsuwp_json` shortcode.
 				 */
-				$subset = apply_filters( 'wsu_content_syndicate_host_data', $subset, $atts );
+				$subset = apply_filters( 'wsu_content_syndicate_local_data', $subset, $atts );
 
 				$subset_key = get_the_date( 'U' );
 				while ( array_key_exists( $subset_key, $new_data ) ) {
