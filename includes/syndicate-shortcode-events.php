@@ -55,7 +55,7 @@ class WSU_Syndicate_Shortcode_Events extends WSU_Syndicate_Shortcode_Base {
 			}
 		}
 
-		$request_url = esc_url( $site_url['host'] . $site_url['path'] . 'wp-json/' ) . $atts['query'];
+		$request_url = esc_url( $site_url['host'] . $site_url['path'] . $this->default_path ) . $atts['query'];
 
 		if ( ! empty( $atts['tag'] ) ) {
 			$request_url = add_query_arg( array( 'filter[tag]' => sanitize_key( $atts['tag'] ) ), $request_url );

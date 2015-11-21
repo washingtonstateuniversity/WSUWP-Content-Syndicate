@@ -7,6 +7,13 @@
  */
 class WSU_Syndicate_Shortcode_Base {
 	/**
+	 * Default path used to consume the REST API from an individual site.
+	 *
+	 * @var string
+	 */
+	public $default_path = 'wp-json/wp/v2/';
+
+	/**
 	 * Default attributes applied to all shortcodes that extend this base.
 	 *
 	 * @var array

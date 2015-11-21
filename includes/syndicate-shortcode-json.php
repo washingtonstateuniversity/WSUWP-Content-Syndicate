@@ -55,7 +55,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 			return apply_filters( 'wsuwp_content_syndicate_json', $content, $atts );
 		}
 
-		$request_url = esc_url( $site_url['host'] . $site_url['path'] . 'wp-json/wp/v2/' ) . $atts['query'];
+		$request_url = esc_url( $site_url['host'] . $site_url['path'] . $this->default_path ) . $atts['query'];
 
 		$request_url = $this->build_taxonomy_filters( $atts, $request_url );
 

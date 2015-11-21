@@ -38,7 +38,7 @@ class WSU_Syndicate_Shortcode_People extends WSU_Syndicate_Shortcode_Base {
 			return $content;
 		}
 
-		$request_url = esc_url( $site_url['host'] . $site_url['path'] . 'wp-json/' ) . $atts['query'];
+		$request_url = esc_url( $site_url['host'] . $site_url['path'] . $this->default_path ) . $atts['query'];
 		$request_url = $this->build_taxonomy_filters( $atts, $request_url );
 
 		if ( $atts['count'] ) {
