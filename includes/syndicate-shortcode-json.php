@@ -88,17 +88,31 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 
 			foreach( $data as $post ) {
 				$subset = new StdClass();
-				$subset->ID = $post->ID;
-				$subset->title = $post->title;
+				$subset->ID = $post->id;
+				$subset->title = $post->title->rendered;
 				$subset->link = $post->link;
-				$subset->excerpt = $post->excerpt;
-				$subset->content = $post->content;
-				$subset->terms = $post->terms;
+				$subset->excerpt = $post->excerpt->rendered;
+				$subset->content = $post->content->rendered;
 				$subset->date = $post->date;
-				$subset->author_name = $post->author->name;
-				$subset->author_avatar = $post->author->avatar;
-				if ( isset( $post->featured_image ) ) {
-					$subset->thumbnail = $post->featured_image->attachment_meta->sizes->{'post-thumbnail'}->url;
+
+				if ( isset( $post->_embedded ) ) {
+					$subset->author_name = $post->_embedded->author[0]->name;
+					$subset->terms = ''; // @todo implement
+				} else {
+					$subset->terms = '';
+					$subset->author_name = '';
+				}
+
+				if ( isset( $post->featured_image ) && isset( $post->_embedded->{"http://api.w.org/featuredmedia"} ) ) {
+					$subset_feature = $post->_embedded->{"http://api.w.org/featuredmedia"}[0]->media_details;
+
+					if ( isset( $subset_feature->sizes->{'post-thumbnail'} ) ) {
+						$subset->thumbnail = $subset_feature->sizes->{'post-thumbnail'}->source_url;
+					} elseif ( isset( $subset_feature->sizes->{'thumbnail'} ) ) {
+						$subset->thumbnail = $subset_feature->sizes->{'thumbnail'}->source_url;
+					} else {
+						$subset->thumbnail = $post->_embedded->{"http://api.w.org/featuredmedia"}[0]->source_url;
+					}
 				} else {
 					$subset->thumbnail = false;
 				}
