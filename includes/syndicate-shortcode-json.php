@@ -89,19 +89,13 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 			foreach( $data as $post ) {
 				$subset = new StdClass();
 				$subset->ID = $post->id;
-				$subset->title = $post->title->rendered;
+				$subset->date = $post->date; // In time zone of requested site
 				$subset->link = $post->link;
-				$subset->excerpt = $post->excerpt->rendered;
-				$subset->content = $post->content->rendered;
-				$subset->date = $post->date;
 
-				if ( isset( $post->_embedded ) ) {
-					$subset->author_name = $post->_embedded->author[0]->name;
-					$subset->terms = ''; // @todo implement
-				} else {
-					$subset->terms = '';
-					$subset->author_name = '';
-				}
+				// These fields all provide a rendered version when the response is generated.
+				$subset->title   = $post->title->rendered;
+				$subset->content = $post->content->rendered;
+				$subset->excerpt = $post->excerpt->rendered;
 
 				if ( isset( $post->featured_image ) && isset( $post->_embedded->{"http://api.w.org/featuredmedia"} ) ) {
 					$subset_feature = $post->_embedded->{"http://api.w.org/featuredmedia"}[0]->media_details;
@@ -115,6 +109,14 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 					}
 				} else {
 					$subset->thumbnail = false;
+				}
+
+				if ( isset( $post->_embedded ) ) {
+					$subset->author_name = $post->_embedded->author[0]->name;
+					$subset->terms = ''; // @todo implement
+				} else {
+					$subset->terms = '';
+					$subset->author_name = '';
 				}
 
 				/**
