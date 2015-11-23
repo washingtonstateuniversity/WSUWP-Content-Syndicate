@@ -97,27 +97,30 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 				$subset->content = $post->content->rendered;
 				$subset->excerpt = $post->excerpt->rendered;
 
-				if ( isset( $post->featured_image ) && isset( $post->_embedded->{"http://api.w.org/featuredmedia"} ) ) {
-					$subset_feature = $post->_embedded->{"http://api.w.org/featuredmedia"}[0]->media_details;
+				// If a featured image is assigned (int), the full data will be in the `_embedded` property.
+				if ( ! empty( $post->featured_image ) && isset( $post->_embedded->{'http://api.w.org/featuredmedia'} ) && 0 < count( $post->_embedded->{'http://api.w.org/featuredmedia'} ) ) {
+					$subset_feature = $post->_embedded->{'http://api.w.org/featuredmedia'}[0]->media_details;
 
 					if ( isset( $subset_feature->sizes->{'post-thumbnail'} ) ) {
 						$subset->thumbnail = $subset_feature->sizes->{'post-thumbnail'}->source_url;
 					} elseif ( isset( $subset_feature->sizes->{'thumbnail'} ) ) {
 						$subset->thumbnail = $subset_feature->sizes->{'thumbnail'}->source_url;
 					} else {
-						$subset->thumbnail = $post->_embedded->{"http://api.w.org/featuredmedia"}[0]->source_url;
+						$subset->thumbnail = $post->_embedded->{'http://api.w.org/featuredmedia'}[0]->source_url;
 					}
 				} else {
 					$subset->thumbnail = false;
 				}
 
-				if ( isset( $post->_embedded ) ) {
+				// If an author is available, it will be in the `_embedded` property.
+				if ( isset( $post->_embedded ) && isset( $post->_embedded->author ) && 0 < count( $post->_embedded->author ) ) {
 					$subset->author_name = $post->_embedded->author[0]->name;
-					$subset->terms = ''; // @todo implement
 				} else {
-					$subset->terms = '';
 					$subset->author_name = '';
 				}
+
+				// We've always provided an empty value for terms. @todo Implement terms. :)
+				$subset->terms = array();
 
 				/**
 				 * Filter the data stored for an individual result after defaults have been built.
