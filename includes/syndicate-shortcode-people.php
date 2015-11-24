@@ -11,6 +11,11 @@ class WSU_Syndicate_Shortcode_People extends WSU_Syndicate_Shortcode_Base {
 		'query'  => 'people',
 	);
 
+	/**
+	 * @var string Shortcode name.
+	 */
+	public $shortcode_name = 'wsuwp_people';
+
 	public function __construct() {
 		parent::construct();
 	}
