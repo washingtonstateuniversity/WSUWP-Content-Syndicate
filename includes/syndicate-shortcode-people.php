@@ -8,7 +8,7 @@ class WSU_Syndicate_Shortcode_People extends WSU_Syndicate_Shortcode_Base {
 	public $local_default_atts = array(
 		'output' => 'basic',
 		'host'   => 'people.wsu.edu',
-		'query'  => 'posts/?type=wsuwp_people_profile',
+		'query'  => 'people',
 	);
 
 	public function __construct() {
