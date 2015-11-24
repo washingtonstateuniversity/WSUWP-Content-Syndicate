@@ -92,7 +92,7 @@ class WSU_Syndicate_Shortcode_People extends WSU_Syndicate_Shortcode_Base {
 					<img src="<?php echo esc_url( $person->profile_photo ); ?>" />
 				</figure>
 				<?php endif; ?>
-				<div class="wsuwp-person-name"><?php echo esc_html( $person->title ); ?></div>
+				<div class="wsuwp-person-name"><?php echo esc_html( $person->title->rendered ); ?></div>
 				<div class="wsuwp-person-position"><?php echo esc_html( $person->position_title ); ?></div>
 				<div class="wsuwp-person-office"><?php echo esc_html( $person->office ); ?></div>
 				<div class="wsuwp-person-email"><?php echo esc_html( $person->email ); ?></div>
