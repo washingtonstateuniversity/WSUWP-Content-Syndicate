@@ -1,6 +1,12 @@
 <?php
 
 class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
+
+	/**
+	 * @var string Shortcode name.
+	 */
+	public $shortcode_name = 'wsuwp_json';
+
 	public function __construct() {
 		parent::construct();
 	}

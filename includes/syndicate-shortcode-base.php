@@ -86,7 +86,7 @@ class WSU_Syndicate_Shortcode_Base {
 		$defaults = shortcode_atts( $this->defaults_atts, $this->local_default_atts );
 		$defaults = $defaults + $this->local_extended_atts;
 
-		return shortcode_atts( $defaults, $atts );
+		return shortcode_atts( $defaults, $atts, $this->shortcode_name );
 	}
 
 	/**
