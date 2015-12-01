@@ -62,7 +62,7 @@ class WSU_Syndicate_Shortcode_People extends WSU_Syndicate_Shortcode_Base {
 			return '';
 		}
 
-		$content = '<div class="wsuwp-people-wrapper">';
+		$content = '<div class="wsuwp-people-wrapper ' . $atts['output'] . '">';
 
 		$people = json_decode( $data );
 
