@@ -7,7 +7,7 @@ class WSU_Syndicate_Shortcode_Events extends WSU_Syndicate_Shortcode_Base {
 	public $local_default_atts = array(
 		'output'      => 'headlines',
 		'host'        => 'calendar.wsu.edu',
-		'query'       => 'posts/?type=tribe_events',
+		'query'       => 'events',
 		'date_format' => 'M j',
 	);
 
