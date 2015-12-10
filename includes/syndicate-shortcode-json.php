@@ -55,7 +55,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 			return apply_filters( 'wsuwp_content_syndicate_json', $content, $atts );
 		}
 
-		$request_url = esc_url( $site_url['host'] . $site_url['path'] . 'wp-json/' ) . $atts['query'];
+		$request_url = esc_url( $site_url['host'] . $site_url['path'] . $this->default_path ) . $atts['query'];
 
 		$request_url = $this->build_taxonomy_filters( $atts, $request_url );
 
@@ -66,6 +66,8 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 		if ( $atts['count'] ) {
 			$request_url = add_query_arg( array( 'filter[posts_per_page]' => absint( $atts['count'] ) ), $request_url );
 		}
+
+		$request_url = add_query_arg( array( '_embed' => '' ), $request_url );
 
 		$response = wp_remote_get( $request_url );
 
@@ -86,20 +88,39 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 
 			foreach( $data as $post ) {
 				$subset = new StdClass();
-				$subset->ID = $post->ID;
-				$subset->title = $post->title;
+				$subset->ID = $post->id;
+				$subset->date = $post->date; // In time zone of requested site
 				$subset->link = $post->link;
-				$subset->excerpt = $post->excerpt;
-				$subset->content = $post->content;
-				$subset->terms = $post->terms;
-				$subset->date = $post->date;
-				$subset->author_name = $post->author->name;
-				$subset->author_avatar = $post->author->avatar;
-				if ( isset( $post->featured_image ) ) {
-					$subset->thumbnail = $post->featured_image->attachment_meta->sizes->{'post-thumbnail'}->url;
+
+				// These fields all provide a rendered version when the response is generated.
+				$subset->title   = $post->title->rendered;
+				$subset->content = $post->content->rendered;
+				$subset->excerpt = $post->excerpt->rendered;
+
+				// If a featured image is assigned (int), the full data will be in the `_embedded` property.
+				if ( ! empty( $post->featured_image ) && isset( $post->_embedded->{'http://api.w.org/featuredmedia'} ) && 0 < count( $post->_embedded->{'http://api.w.org/featuredmedia'} ) ) {
+					$subset_feature = $post->_embedded->{'http://api.w.org/featuredmedia'}[0]->media_details;
+
+					if ( isset( $subset_feature->sizes->{'post-thumbnail'} ) ) {
+						$subset->thumbnail = $subset_feature->sizes->{'post-thumbnail'}->source_url;
+					} elseif ( isset( $subset_feature->sizes->{'thumbnail'} ) ) {
+						$subset->thumbnail = $subset_feature->sizes->{'thumbnail'}->source_url;
+					} else {
+						$subset->thumbnail = $post->_embedded->{'http://api.w.org/featuredmedia'}[0]->source_url;
+					}
 				} else {
 					$subset->thumbnail = false;
 				}
+
+				// If an author is available, it will be in the `_embedded` property.
+				if ( isset( $post->_embedded ) && isset( $post->_embedded->author ) && 0 < count( $post->_embedded->author ) ) {
+					$subset->author_name = $post->_embedded->author[0]->name;
+				} else {
+					$subset->author_name = '';
+				}
+
+				// We've always provided an empty value for terms. @todo Implement terms. :)
+				$subset->terms = array();
 
 				/**
 				 * Filter the data stored for an individual result after defaults have been built.

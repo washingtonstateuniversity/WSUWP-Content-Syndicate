@@ -7,7 +7,7 @@ class WSU_Syndicate_Shortcode_Events extends WSU_Syndicate_Shortcode_Base {
 	public $local_default_atts = array(
 		'output'      => 'headlines',
 		'host'        => 'calendar.wsu.edu',
-		'query'       => 'posts/?type=tribe_events',
+		'query'       => 'events',
 		'date_format' => 'M j',
 	);
 
@@ -55,7 +55,7 @@ class WSU_Syndicate_Shortcode_Events extends WSU_Syndicate_Shortcode_Base {
 			}
 		}
 
-		$request_url = esc_url( $site_url['host'] . $site_url['path'] . 'wp-json/' ) . $atts['query'];
+		$request_url = esc_url( $site_url['host'] . $site_url['path'] . $this->default_path ) . $atts['query'];
 
 		if ( ! empty( $atts['tag'] ) ) {
 			$request_url = add_query_arg( array( 'filter[tag]' => sanitize_key( $atts['tag'] ) ), $request_url );
@@ -93,10 +93,10 @@ class WSU_Syndicate_Shortcode_Events extends WSU_Syndicate_Shortcode_Base {
 				$subset->date = $post->date;
 
 				// Custom data added to events by WSUWP Extended Events Calendar
-				$subset->start_date = isset( $post->meta->start_date ) ? $post->meta->start_date : '';
-				$subset->event_city = isset( $post->meta->event_city ) ? $post->meta->event_city : '';
-				$subset->event_state = isset( $post->meta->event_state ) ? $post->meta->event_state : '';
-				$subset->event_venue = isset( $post->meta->event_venue ) ? $post->meta->event_venue : '';
+				$subset->start_date = isset( $post->start_date ) ? $post->start_date : '';
+				$subset->event_city = isset( $post->event_city ) ? $post->event_city : '';
+				$subset->event_state = isset( $post->event_state ) ? $post->event_state : '';
+				$subset->event_venue = isset( $post->event_venue ) ? $post->event_venue : '';
 
 				$subset_key = strtotime( $post->date );
 				while ( array_key_exists( $subset_key, $new_data ) ) {
