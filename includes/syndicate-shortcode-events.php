@@ -84,12 +84,12 @@ class WSU_Syndicate_Shortcode_Events extends WSU_Syndicate_Shortcode_Base {
 
 			foreach( $data as $post ) {
 				$subset = new StdClass();
-				$subset->ID = $post->ID;
-				$subset->title = $post->title;
+				$subset->ID = $post->id;
+				$subset->title = $post->title->rendered;
 				$subset->link = $post->link;
-				$subset->excerpt = $post->excerpt;
-				$subset->content = $post->content;
-				$subset->terms = $post->terms;
+				$subset->excerpt = $post->excerpt->rendered;
+				$subset->content = $post->content->rendered;
+				$subset->terms = array(); // @todo implement terms
 				$subset->date = $post->date;
 
 				// Custom data added to events by WSUWP Extended Events Calendar
