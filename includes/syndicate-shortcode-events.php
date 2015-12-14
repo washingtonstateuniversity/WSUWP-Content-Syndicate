@@ -18,6 +18,11 @@ class WSU_Syndicate_Shortcode_Events extends WSU_Syndicate_Shortcode_Base {
 		'category' => '',
 	);
 
+	/**
+	 * @var string Shortcode name.
+	 */
+	public $shortcode_name = 'wsuwp_events';
+
 	public function __construct() {
 		parent::construct();
 	}

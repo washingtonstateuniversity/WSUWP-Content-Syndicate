@@ -11,6 +11,18 @@ class WSU_Syndicate_Shortcode_People extends WSU_Syndicate_Shortcode_Base {
 		'query'  => 'people',
 	);
 
+	/**
+	 * @var array A set of default attributes for this shortcode only.
+	 */
+	public $local_extended_atts = array(
+		'classification' => '',
+	);
+
+	/**
+	 * @var string Shortcode name.
+	 */
+	public $shortcode_name = 'wsuwp_people';
+
 	public function __construct() {
 		parent::construct();
 	}
@@ -41,6 +53,13 @@ class WSU_Syndicate_Shortcode_People extends WSU_Syndicate_Shortcode_Base {
 		$request_url = esc_url( $site_url['host'] . $site_url['path'] . $this->default_path ) . $atts['query'];
 		$request_url = $this->build_taxonomy_filters( $atts, $request_url );
 
+		if ( ! empty( $atts['classification'] ) ) {
+			$request_url = add_query_arg( array(
+				'filter[taxonomy]' => 'classification',
+				'filter[term]' => sanitize_key( $atts['classification'] ),
+			), $request_url );
+		}
+
 		if ( $atts['count'] ) {
 			$request_url = add_query_arg( array( 'filter[posts_per_page]' => absint( $atts['count'] ) ), $request_url );
 		}
@@ -57,11 +76,13 @@ class WSU_Syndicate_Shortcode_People extends WSU_Syndicate_Shortcode_Base {
 			return '';
 		}
 
-		$content = '<div class="wsuwp-people-wrapper">';
+		$content = '<div class="wsuwp-people-wrapper ' . $atts['output'] . '">';
 
 		$people = json_decode( $data );
 
-		$people = apply_filters( 'wsuwp_people_sort_items', $people );
+		$people = apply_filters( 'wsuwp_people_sort_items', $people, $atts );
+
+		$content .= apply_filters( 'wsuwp_people_prefix', '', $people, $atts );
 
 		foreach ( $people as $person ) {
 			$content .= $this->generate_item_html( $person, $atts['output'] );
