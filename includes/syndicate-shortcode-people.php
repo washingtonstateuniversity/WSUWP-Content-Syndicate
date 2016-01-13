@@ -54,10 +54,13 @@ class WSU_Syndicate_Shortcode_People extends WSU_Syndicate_Shortcode_Base {
 		$request_url = $this->build_taxonomy_filters( $atts, $request_url );
 
 		if ( ! empty( $atts['classification'] ) ) {
-			$request_url = add_query_arg( array(
-				'filter[taxonomy]' => 'classification',
-				'filter[term]' => sanitize_key( $atts['classification'] ),
-			), $request_url );
+			$request_url = add_query_arg( array( 'filter[taxonomy]' => 'classification' ), $request_url );
+
+			$terms = explode( ',', $atts['classification'] );
+			foreach( $terms as $term ) {
+				$term = trim( $term );
+				$request_url = add_query_arg( array( 'filter[term]' => sanitize_key( $term ) ), $request_url );
+			}
 		}
 
 		if ( $atts['count'] ) {
