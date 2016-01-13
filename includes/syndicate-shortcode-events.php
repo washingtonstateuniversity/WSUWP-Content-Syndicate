@@ -45,17 +45,17 @@ class WSU_Syndicate_Shortcode_Events extends WSU_Syndicate_Shortcode_Base {
 			return apply_filters( 'wsuwp_content_syndicate_json', $content, $atts );
 		}
 
+		$request_url = esc_url( $site_url['host'] . $site_url['path'] . $this->default_path ) . $atts['query'];
+
 		if ( '' !== $atts['category'] ) {
-			$atts['query'] = 'posts/?type=tribe_events&filter[taxonomy]=tribe_events_cat';
+			$request_url = add_query_arg( array( 'filter[taxonomy]' => 'tribe_events_cat' ), $request_url );
 
 			$terms = explode( ',', $atts['category'] );
 			foreach( $terms as $term ) {
 				$term = trim( $term );
-				$atts['query'] .= '&filter[term]=' . sanitize_key( $term );
+				$request_url = add_query_arg( array( 'filter[term]' => sanitize_key( $term ) ), $request_url );
 			}
 		}
-
-		$request_url = esc_url( $site_url['host'] . $site_url['path'] . $this->default_path ) . $atts['query'];
 
 		if ( ! empty( $atts['tag'] ) ) {
 			$request_url = add_query_arg( array( 'filter[tag]' => sanitize_key( $atts['tag'] ) ), $request_url );
