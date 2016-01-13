@@ -52,6 +52,11 @@ class WSU_Syndicate_Shortcode_Base {
 	public $local_extended_atts = array();
 
 	/**
+	 * @var string The shortcode name.
+	 */
+	public $shortcode_name = '';
+
+	/**
 	 * A common constructor that initiates the shortcode.
 	 */
 	public function construct() {
