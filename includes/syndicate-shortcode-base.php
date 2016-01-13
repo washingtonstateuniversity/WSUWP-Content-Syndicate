@@ -25,6 +25,7 @@ class WSU_Syndicate_Shortcode_Base {
 		'site' => '',
 		'university_category_slug' => '',
 		'university_organization_slug' => '',
+		'university_location_slug' => '',
 		'site_category_slug' => '',
 		'tag' => '',
 		'query' => 'posts',
@@ -49,6 +50,11 @@ class WSU_Syndicate_Shortcode_Base {
 	 * @var array
 	 */
 	public $local_extended_atts = array();
+
+	/**
+	 * @var string The shortcode name.
+	 */
+	public $shortcode_name = '';
 
 	/**
 	 * A common constructor that initiates the shortcode.
@@ -85,7 +91,7 @@ class WSU_Syndicate_Shortcode_Base {
 		$defaults = shortcode_atts( $this->defaults_atts, $this->local_default_atts );
 		$defaults = $defaults + $this->local_extended_atts;
 
-		return shortcode_atts( $defaults, $atts );
+		return shortcode_atts( $defaults, $atts, $this->shortcode_name );
 	}
 
 	/**
@@ -163,6 +169,13 @@ class WSU_Syndicate_Shortcode_Base {
 			$request_url = add_query_arg( array(
 				'filter[taxonomy]' => 'wsuwp_university_org',
 				'filter[term]' => sanitize_key( $atts['university_organization_slug'] ),
+			), $request_url );
+		}
+
+		if ( ! empty( $atts['university_location_slug'] ) ) {
+			$request_url = add_query_arg( array(
+				'filter[taxonomy]' => 'wsuwp_university_location',
+				'filter[term]' => sanitize_key( $atts['university_location_slug'] ),
 			), $request_url );
 		}
 

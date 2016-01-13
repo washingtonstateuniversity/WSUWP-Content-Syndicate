@@ -11,6 +11,11 @@ class WSU_Syndicate_Shortcode_People extends WSU_Syndicate_Shortcode_Base {
 		'query'  => 'people',
 	);
 
+	/**
+	 * @var string Shortcode name.
+	 */
+	public $shortcode_name = 'wsuwp_people';
+
 	public function __construct() {
 		parent::construct();
 	}
@@ -61,7 +66,7 @@ class WSU_Syndicate_Shortcode_People extends WSU_Syndicate_Shortcode_Base {
 
 		$people = json_decode( $data );
 
-		$people = apply_filters( 'wsuwp_people_sort_items', $people );
+		$people = apply_filters( 'wsuwp_people_sort_items', $people, $atts );
 
 		foreach ( $people as $person ) {
 			$content .= $this->generate_item_html( $person, $atts['output'] );
