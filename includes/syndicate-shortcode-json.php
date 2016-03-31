@@ -104,7 +104,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 				$subset->excerpt = $post->excerpt->rendered;
 
 				// If a featured image is assigned (int), the full data will be in the `_embedded` property.
-				if ( ! empty( $post->featured_image ) && isset( $post->_embedded->{'https://api.w.org/featuredmedia'} ) && 0 < count( $post->_embedded->{'https://api.w.org/featuredmedia'} ) ) {
+				if ( ! empty( $post->featured_media ) && isset( $post->_embedded->{'https://api.w.org/featuredmedia'} ) && 0 < count( $post->_embedded->{'https://api.w.org/featuredmedia'} ) ) {
 					$subset_feature = $post->_embedded->{'https://api.w.org/featuredmedia'}[0]->media_details;
 
 					if ( isset( $subset_feature->sizes->{'post-thumbnail'} ) ) {
