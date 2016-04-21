@@ -77,6 +77,11 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 
 		$response = wp_remote_get( $request_url );
 
+		if ( is_wp_error( $response ) ) {
+			$response_error = sanitize_text_field( $response->get_error_message() );
+			error_log( 'WSUWP Content Syndicate: Response WP_Error. Message: ' . $response_error );
+		}
+
 		$data = wp_remote_retrieve_body( $response );
 
 		$new_data = array();
@@ -150,6 +155,8 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 				}
 				$new_data[ $subset_key ] = $subset;
 			}
+		} else {
+			error_log( 'WSUWP Content Syndicate: Empty Data.' );
 		}
 
 		if ( 0 !== absint( $atts['local_count'] ) ) {
@@ -296,6 +303,10 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 		}
 		$content = ob_get_contents();
 		ob_end_clean();
+
+		if ( empty( $content ) ) {
+			error_log( 'WSUWP Content Syndicate: Empty content after output buffering.' );
+		}
 
 		// Store the built content in cache for repeated use.
 		$this->set_content_cache( $atts, 'wsuwp_json', $content );
