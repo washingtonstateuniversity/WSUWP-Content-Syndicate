@@ -304,6 +304,10 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 		$content = ob_get_contents();
 		ob_end_clean();
 
+		if ( empty( $content ) ) {
+			error_log( 'WSUWP Content Syndicate: Empty content after output buffering.' );
+		}
+
 		// Store the built content in cache for repeated use.
 		$this->set_content_cache( $atts, 'wsuwp_json', $content );
 
