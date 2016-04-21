@@ -77,6 +77,11 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 
 		$response = wp_remote_get( $request_url );
 
+		if ( is_wp_error( $response ) ) {
+			$response_error = sanitize_text_field( $response->get_error_message() );
+			error_log( 'WSUWP Content Syndicate: Response WP_Error. Message: ' . $response_error );
+		}
+
 		$data = wp_remote_retrieve_body( $response );
 
 		$new_data = array();
