@@ -5,7 +5,7 @@ Plugin URI: https://web.wsu.edu/wordpress/plugins/wsuwp-content-syndicate/
 Description: Retrieve content for display from throughout Washington State University
 Author: washingtonstateuniversity, jeremyfelt
 Author URI: https://web.wsu.edu/
-Version: 0.8.7
+Version: 0.8.8
 */
 
 class WSU_Content_Syndicate {
