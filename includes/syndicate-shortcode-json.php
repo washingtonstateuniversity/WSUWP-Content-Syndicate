@@ -155,6 +155,8 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 				}
 				$new_data[ $subset_key ] = $subset;
 			}
+		} else {
+			error_log( 'WSUWP Content Syndicate: Empty Data.' );
 		}
 
 		if ( 0 !== absint( $atts['local_count'] ) ) {
