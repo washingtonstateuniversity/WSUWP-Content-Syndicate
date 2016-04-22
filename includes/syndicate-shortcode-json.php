@@ -61,6 +61,24 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 			return apply_filters( 'wsuwp_content_syndicate_json', $content, $atts );
 		}
 
+		$local_site_id = false;
+		// If local results were requested, verify the site is local first and switch back to HTTP if
+		// it is not. If remote results were requested, and this is multisite, check for a local site anyway.
+		if ( 'local' === $atts['scheme'] ) {
+			$local_site = get_blog_details( array( 'domain' => $site_url['host'], 'path' => $site_url['path'] ), false );
+			if ( $local_site ) {
+				$local_site_id = $local_site->blog_id;
+			} else {
+				$atts['scheme'] = 'http';
+			}
+		} elseif( is_multisite() ) {
+			$local_site = get_blog_details( array( 'domain' => $site_url['host'], 'path' => $site_url['path'] ), false );
+			if ( $local_site ) {
+				$local_site_id = $local_site->blog_id;
+				$atts['scheme'] = 'local';
+			}
+		}
+
 		$request_url = esc_url( $site_url['host'] . $site_url['path'] . $this->default_path ) . $atts['query'];
 
 		$request_url = $this->build_taxonomy_filters( $atts, $request_url );
@@ -75,88 +93,34 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 
 		$request_url = add_query_arg( array( '_embed' => '' ), $request_url );
 
-		$response = wp_remote_get( $request_url );
-
-		if ( is_wp_error( $response ) ) {
-			$response_error = sanitize_text_field( $response->get_error_message() );
-			error_log( 'WSUWP Content Syndicate: Response WP_Error. Message: ' . $response_error );
-		}
-
-		$data = wp_remote_retrieve_body( $response );
-
-		$new_data = array();
-		if ( ! empty( $data ) ) {
-			$original_data = $data;
-			$data = json_decode( $data );
-
-			if ( NULL === $data ) {
-				$original_type = gettype( $original_data );
-				error_log( 'WSUWP Content Syndicate: Null JSON. Original type: ' . $original_type );
-				error_log( 'WSUWP Content Syndicate: Original URL: ' . esc_url( $request_url ) );
-				error_log( 'WSUWP Content Syndicate: Original Response Code: ' . wp_remote_retrieve_response_code( $response ) );
-				$data = array();
-			}
-
-			foreach( $data as $post ) {
-				$subset = new StdClass();
-				$subset->ID = $post->id;
-				$subset->date = $post->date; // In time zone of requested site
-				$subset->link = $post->link;
-
-				// These fields all provide a rendered version when the response is generated.
-				$subset->title   = $post->title->rendered;
-				$subset->content = $post->content->rendered;
-				$subset->excerpt = $post->excerpt->rendered;
-
-				// If a featured image is assigned (int), the full data will be in the `_embedded` property.
-				if ( ! empty( $post->featured_media ) && isset( $post->_embedded->{'wp:featuredmedia'} ) && 0 < count( $post->_embedded->{'wp:featuredmedia'} ) ) {
-					$subset_feature = $post->_embedded->{'wp:featuredmedia'}[0]->media_details;
-
-					if ( isset( $subset_feature->sizes->{'post-thumbnail'} ) ) {
-						$subset->thumbnail = $subset_feature->sizes->{'post-thumbnail'}->source_url;
-					} elseif ( isset( $subset_feature->sizes->{'thumbnail'} ) ) {
-						$subset->thumbnail = $subset_feature->sizes->{'thumbnail'}->source_url;
-					} else {
-						$subset->thumbnail = $post->_embedded->{'wp:featuredmedia'}[0]->source_url;
-					}
-				} else {
-					$subset->thumbnail = false;
-				}
-
-				// If an author is available, it will be in the `_embedded` property.
-				if ( isset( $post->_embedded ) && isset( $post->_embedded->author ) && 0 < count( $post->_embedded->author ) ) {
-					$subset->author_name = $post->_embedded->author[0]->name;
-				} else {
-					$subset->author_name = '';
-				}
-
-				// We've always provided an empty value for terms. @todo Implement terms. :)
-				$subset->terms = array();
-
-				/**
-				 * Filter the data stored for an individual result after defaults have been built.
-				 *
-				 * @since 0.7.10
-				 *
-				 * @param object $subset Data attached to this result.
-				 * @param object $post   Data for an individual post retrieved via `wp-json/posts` from a remote host.
-				 * @param array  $atts   Attributes originally passed to the `wsuwp_json` shortcode.
-				 */
-				$subset = apply_filters( 'wsu_content_syndicate_host_data', $subset, $post, $atts );
-
-				if ( $post->date ) {
-					$subset_key = strtotime( $post->date );
-				} else {
-					$subset_key = time();
-				}
-
-				while ( array_key_exists( $subset_key, $new_data ) ) {
-					$subset_key++;
-				}
-				$new_data[ $subset_key ] = $subset;
-			}
+		if ( 'local' === $atts['scheme'] ) {
+			switch_to_blog( $local_site_id );
+			$request = WP_REST_Request::from_url( $request_url );
+			$response = rest_do_request( $request );
+			$new_data = $this->process_local_posts( $response->data, $atts );
+			restore_current_blog();
 		} else {
-			error_log( 'WSUWP Content Syndicate: Empty Data.' );
+			error_log( 'WSUWP Content Syndicate: Remote request made. URL: ' . esc_url( $request_url ) );
+			$response = wp_remote_get( $request_url );
+
+			if ( is_wp_error( $response ) ) {
+				$response_error = sanitize_text_field( $response->get_error_message() );
+				error_log( 'WSUWP Content Syndicate: Response WP_Error. Message: ' . $response_error );
+			} else {
+				$data = wp_remote_retrieve_body( $response );
+				$original_data = $data;
+				$data = json_decode( $data );
+
+				if ( NULL === $data ) {
+					$original_type = gettype( $original_data );
+					error_log( 'WSUWP Content Syndicate: Null JSON. Original type: ' . $original_type );
+					error_log( 'WSUWP Content Syndicate: Original URL: ' . esc_url( $request_url ) );
+					error_log( 'WSUWP Content Syndicate: Original Response Code: ' . wp_remote_retrieve_response_code( $response ) );
+					$data = array();
+				}
+
+				$new_data = $this->process_remote_posts( $data, $atts );
+			}
 		}
 
 		if ( 0 !== absint( $atts['local_count'] ) ) {
@@ -165,7 +129,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 
 			while ( $news_query->have_posts() ) {
 				$news_query->the_post();
-				$subset = new StdClass();
+				$subset = new stdClass();
 				$subset->ID = get_the_ID();
 				$subset->date = get_the_date();
 				$subset->title = get_the_title();
@@ -314,5 +278,170 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 		$content = apply_filters( 'wsuwp_content_syndicate_json', $content, $atts );
 
 		return $content;
+	}
+
+	/**
+	 * Process REST API results received remotely through `wp_remote_get()`
+	 *
+	 * @since 0.9.0
+	 *
+	 * @param object $data List of post data.
+	 * @param array  $atts Attributes passed with the original shortcode.
+	 *
+	 * @return array Array of objects representing individual posts.
+	 */
+	public function process_remote_posts( $data, $atts ) {
+		if ( empty( $data ) ) {
+			return array();
+		}
+
+		$new_data = array();
+
+		foreach( $data as $post ) {
+			$subset = new StdClass();
+			$subset->ID = $post->id;
+			$subset->date = $post->date; // In time zone of requested site
+			$subset->link = $post->link;
+
+			// These fields all provide a rendered version when the response is generated.
+			$subset->title   = $post->title->rendered;
+			$subset->content = $post->content->rendered;
+			$subset->excerpt = $post->excerpt->rendered;
+
+			// If a featured image is assigned (int), the full data will be in the `_embedded` property.
+			if ( ! empty( $post->featured_media ) && isset( $post->_embedded->{'wp:featuredmedia'} ) && 0 < count( $post->_embedded->{'wp:featuredmedia'} ) ) {
+				$subset_feature = $post->_embedded->{'wp:featuredmedia'}[0]->media_details;
+
+				if ( isset( $subset_feature->sizes->{'post-thumbnail'} ) ) {
+					$subset->thumbnail = $subset_feature->sizes->{'post-thumbnail'}->source_url;
+				} elseif ( isset( $subset_feature->sizes->{'thumbnail'} ) ) {
+					$subset->thumbnail = $subset_feature->sizes->{'thumbnail'}->source_url;
+				} else {
+					$subset->thumbnail = $post->_embedded->{'wp:featuredmedia'}[0]->source_url;
+				}
+			} else {
+				$subset->thumbnail = false;
+			}
+
+			// If an author is available, it will be in the `_embedded` property.
+			if ( isset( $post->_embedded ) && isset( $post->_embedded->author ) && 0 < count( $post->_embedded->author ) ) {
+				$subset->author_name = $post->_embedded->author[0]->name;
+			} else {
+				$subset->author_name = '';
+			}
+
+			// We've always provided an empty value for terms. @todo Implement terms. :)
+			$subset->terms = array();
+
+			/**
+			 * Filter the data stored for an individual result after defaults have been built.
+			 *
+			 * @since 0.7.10
+			 *
+			 * @param object $subset Data attached to this result.
+			 * @param object $post   Data for an individual post retrieved via `wp-json/posts` from a remote host.
+			 * @param array  $atts   Attributes originally passed to the `wsuwp_json` shortcode.
+			 */
+			$subset = apply_filters( 'wsu_content_syndicate_host_data', $subset, $post, $atts );
+
+			if ( $post->date ) {
+				$subset_key = strtotime( $post->date );
+			} else {
+				$subset_key = time();
+			}
+
+			while ( array_key_exists( $subset_key, $new_data ) ) {
+				$subset_key++;
+			}
+			$new_data[ $subset_key ] = $subset;
+		}
+
+		return $new_data;
+	}
+
+	/**
+	 * Process REST API results received locally through `rest_do_request()`
+	 *
+	 * @since 0.9.0
+	 *
+	 * @param array $data Array of post data.
+	 * @param array $atts Attributes passed with the original shortcode.
+	 *
+	 * @return array Array of objects representing individual posts.
+	 */
+	public function process_local_posts( $data, $atts ) {
+		if ( empty( $data ) ) {
+			return array();
+		}
+
+		$new_data = array();
+
+		foreach( $data as $post ) {
+			$subset = new stdClass();
+			$subset->ID = $post['id'];
+			$subset->date = $post['date']; // In time zone of requested site
+			$subset->link = $post['link'];
+
+			// These fields all provide a rendered version when the response is generated.
+			$subset->title   = $post['title']['rendered'];
+			$subset->content = $post['content']['rendered'];
+			$subset->excerpt = $post['excerpt']['rendered'];
+
+			if ( ! empty ( $post['featured_media'] ) && ! empty( $post['_links']['wp:featuredmedia'] ) ) {
+				$media_request_url = $post['_links']['wp:featuredmedia'][0]['href'];
+				$media_request = WP_REST_Request::from_url( $media_request_url );
+				$media_response = rest_do_request( $media_request );
+				$data = $media_response->data;
+				$data = $data['media_details']['sizes'];
+
+				if ( isset( $data['post-thumbnail'] ) ) {
+					$subset->thumbnail = $data['post-thumbnail']['source_url'];
+				} elseif( isset( $data['thumbnail'] ) ) {
+					$subset->thumbnail = $data['thumbnail']['source_url'];
+				} else {
+					$subset->thumbnail = $media_response->data['source_url'];
+				}
+			} else {
+				$subset->thumbnail = false;
+			}
+
+			$subset->author_name = '';
+
+			if ( ! empty( $post['author'] ) && ! empty( $post['_links']['author'] ) ) {
+				$author_request_url = $post['_links']['author'][0]['href'];
+				$author_request = WP_REST_Request::from_url( $author_request_url );
+				$author_response = rest_do_request( $author_request );
+				if ( isset( $author_response->data['name'] ) ) {
+					$subset->author_name = $author_response->data['name'];
+				}
+			}
+
+			// We've always provided an empty value for terms. @todo Implement terms. :)
+			$subset->terms = array();
+
+			/**
+			 * Filter the data stored for an individual result after defaults have been built.
+			 *
+			 * @since 0.7.10
+			 *
+			 * @param object $subset Data attached to this result.
+			 * @param object $post   Data for an individual post retrieved via `wp-json/posts` from a remote host.
+			 * @param array  $atts   Attributes originally passed to the `wsuwp_json` shortcode.
+			 */
+			$subset = apply_filters( 'wsu_content_syndicate_host_data', $subset, $post, $atts );
+
+			if ( $post['date'] ) {
+				$subset_key = strtotime( $post['date'] );
+			} else {
+				$subset_key = time();
+			}
+
+			while ( array_key_exists( $subset_key, $new_data ) ) {
+				$subset_key++;
+			}
+			$new_data[ $subset_key ] = $subset;
+		}
+
+		return $new_data;
 	}
 }

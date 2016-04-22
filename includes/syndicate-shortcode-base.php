@@ -22,6 +22,7 @@ class WSU_Syndicate_Shortcode_Base {
 		'object' => 'json_data',
 		'output' => 'json',
 		'host' => 'news.wsu.edu',
+		'scheme' => 'local',
 		'site' => '',
 		'university_category_slug' => '',
 		'university_organization_slug' => '',
