@@ -61,6 +61,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 			return apply_filters( 'wsuwp_content_syndicate_json', $content, $atts );
 		}
 
+		$url_scheme = 'http';
 		$local_site_id = false;
 		// If local results were requested, verify the site is local first and switch back to HTTP if
 		// it is not. If remote results were requested, and this is multisite, check for a local site anyway.
@@ -68,6 +69,8 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 			$local_site = get_blog_details( array( 'domain' => $site_url['host'], 'path' => $site_url['path'] ), false );
 			if ( $local_site ) {
 				$local_site_id = $local_site->blog_id;
+				$local_home_url = get_home_url( $local_site_id );
+				$url_scheme = parse_url( $local_home_url, PHP_URL_SCHEME );
 			} else {
 				$atts['scheme'] = 'http';
 			}
@@ -75,11 +78,13 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 			$local_site = get_blog_details( array( 'domain' => $site_url['host'], 'path' => $site_url['path'] ), false );
 			if ( $local_site ) {
 				$local_site_id = $local_site->blog_id;
+				$local_home_url = get_home_url( $local_site_id );
+				$url_scheme = parse_url( $local_home_url, PHP_URL_SCHEME );
 				$atts['scheme'] = 'local';
 			}
 		}
 
-		$request_url = esc_url( $site_url['host'] . $site_url['path'] . $this->default_path ) . $atts['query'];
+		$request_url = esc_url( $url_scheme . '://' . $site_url['host'] . $site_url['path'] . $this->default_path ) . $atts['query'];
 
 		$request_url = $this->build_taxonomy_filters( $atts, $request_url );
 
