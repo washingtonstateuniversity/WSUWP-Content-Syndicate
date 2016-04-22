@@ -107,7 +107,17 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 				error_log( 'WSUWP Content Syndicate: Response WP_Error. Message: ' . $response_error );
 			} else {
 				$data = wp_remote_retrieve_body( $response );
+				$original_data = $data;
 				$data = json_decode( $data );
+
+				if ( NULL === $data ) {
+					$original_type = gettype( $original_data );
+					error_log( 'WSUWP Content Syndicate: Null JSON. Original type: ' . $original_type );
+					error_log( 'WSUWP Content Syndicate: Original URL: ' . esc_url( $request_url ) );
+					error_log( 'WSUWP Content Syndicate: Original Response Code: ' . wp_remote_retrieve_response_code( $response ) );
+					$data = array();
+				}
+
 				$new_data = $this->process_remote_posts( $data, $atts );
 			}
 		}
@@ -280,78 +290,69 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 	 * @return array Array of objects representing individual posts.
 	 */
 	public function process_remote_posts( $data, $atts ) {
+		if ( empty( $data ) ) {
+			return array();
+		}
+
 		$new_data = array();
-		if ( ! empty( $data ) ) {
-			$original_data = $data;
 
-			if ( NULL === $data ) {
-				$original_type = gettype( $original_data );
-				error_log( 'WSUWP Content Syndicate: Null JSON. Original type: ' . $original_type );
-				error_log( 'WSUWP Content Syndicate: Original URL: ' . esc_url( $request_url ) );
-				error_log( 'WSUWP Content Syndicate: Original Response Code: ' . wp_remote_retrieve_response_code( $response ) );
-				$data = array();
+		foreach( $data as $post ) {
+			$subset = new StdClass();
+			$subset->ID = $post->id;
+			$subset->date = $post->date; // In time zone of requested site
+			$subset->link = $post->link;
+
+			// These fields all provide a rendered version when the response is generated.
+			$subset->title   = $post->title->rendered;
+			$subset->content = $post->content->rendered;
+			$subset->excerpt = $post->excerpt->rendered;
+
+			// If a featured image is assigned (int), the full data will be in the `_embedded` property.
+			if ( ! empty( $post->featured_media ) && isset( $post->_embedded->{'wp:featuredmedia'} ) && 0 < count( $post->_embedded->{'wp:featuredmedia'} ) ) {
+				$subset_feature = $post->_embedded->{'wp:featuredmedia'}[0]->media_details;
+
+				if ( isset( $subset_feature->sizes->{'post-thumbnail'} ) ) {
+					$subset->thumbnail = $subset_feature->sizes->{'post-thumbnail'}->source_url;
+				} elseif ( isset( $subset_feature->sizes->{'thumbnail'} ) ) {
+					$subset->thumbnail = $subset_feature->sizes->{'thumbnail'}->source_url;
+				} else {
+					$subset->thumbnail = $post->_embedded->{'wp:featuredmedia'}[0]->source_url;
+				}
+			} else {
+				$subset->thumbnail = false;
 			}
 
-			foreach( $data as $post ) {
-				$subset = new StdClass();
-				$subset->ID = $post->id;
-				$subset->date = $post->date; // In time zone of requested site
-				$subset->link = $post->link;
-
-				// These fields all provide a rendered version when the response is generated.
-				$subset->title   = $post->title->rendered;
-				$subset->content = $post->content->rendered;
-				$subset->excerpt = $post->excerpt->rendered;
-
-				// If a featured image is assigned (int), the full data will be in the `_embedded` property.
-				if ( ! empty( $post->featured_media ) && isset( $post->_embedded->{'wp:featuredmedia'} ) && 0 < count( $post->_embedded->{'wp:featuredmedia'} ) ) {
-					$subset_feature = $post->_embedded->{'wp:featuredmedia'}[0]->media_details;
-
-					if ( isset( $subset_feature->sizes->{'post-thumbnail'} ) ) {
-						$subset->thumbnail = $subset_feature->sizes->{'post-thumbnail'}->source_url;
-					} elseif ( isset( $subset_feature->sizes->{'thumbnail'} ) ) {
-						$subset->thumbnail = $subset_feature->sizes->{'thumbnail'}->source_url;
-					} else {
-						$subset->thumbnail = $post->_embedded->{'wp:featuredmedia'}[0]->source_url;
-					}
-				} else {
-					$subset->thumbnail = false;
-				}
-
-				// If an author is available, it will be in the `_embedded` property.
-				if ( isset( $post->_embedded ) && isset( $post->_embedded->author ) && 0 < count( $post->_embedded->author ) ) {
-					$subset->author_name = $post->_embedded->author[0]->name;
-				} else {
-					$subset->author_name = '';
-				}
-
-				// We've always provided an empty value for terms. @todo Implement terms. :)
-				$subset->terms = array();
-
-				/**
-				 * Filter the data stored for an individual result after defaults have been built.
-				 *
-				 * @since 0.7.10
-				 *
-				 * @param object $subset Data attached to this result.
-				 * @param object $post   Data for an individual post retrieved via `wp-json/posts` from a remote host.
-				 * @param array  $atts   Attributes originally passed to the `wsuwp_json` shortcode.
-				 */
-				$subset = apply_filters( 'wsu_content_syndicate_host_data', $subset, $post, $atts );
-
-				if ( $post->date ) {
-					$subset_key = strtotime( $post->date );
-				} else {
-					$subset_key = time();
-				}
-
-				while ( array_key_exists( $subset_key, $new_data ) ) {
-					$subset_key++;
-				}
-				$new_data[ $subset_key ] = $subset;
+			// If an author is available, it will be in the `_embedded` property.
+			if ( isset( $post->_embedded ) && isset( $post->_embedded->author ) && 0 < count( $post->_embedded->author ) ) {
+				$subset->author_name = $post->_embedded->author[0]->name;
+			} else {
+				$subset->author_name = '';
 			}
-		} else {
-			error_log( 'WSUWP Content Syndicate: Empty Data.' );
+
+			// We've always provided an empty value for terms. @todo Implement terms. :)
+			$subset->terms = array();
+
+			/**
+			 * Filter the data stored for an individual result after defaults have been built.
+			 *
+			 * @since 0.7.10
+			 *
+			 * @param object $subset Data attached to this result.
+			 * @param object $post   Data for an individual post retrieved via `wp-json/posts` from a remote host.
+			 * @param array  $atts   Attributes originally passed to the `wsuwp_json` shortcode.
+			 */
+			$subset = apply_filters( 'wsu_content_syndicate_host_data', $subset, $post, $atts );
+
+			if ( $post->date ) {
+				$subset_key = strtotime( $post->date );
+			} else {
+				$subset_key = time();
+			}
+
+			while ( array_key_exists( $subset_key, $new_data ) ) {
+				$subset_key++;
+			}
+			$new_data[ $subset_key ] = $subset;
 		}
 
 		return $new_data;
