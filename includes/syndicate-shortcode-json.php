@@ -58,7 +58,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 
 		// Retrieve existing content from cache if available.
 		if ( $content = $this->get_content_cache( $atts, 'wsuwp_json' ) ) {
-			//return apply_filters( 'wsuwp_content_syndicate_json', $content, $atts );
+			return apply_filters( 'wsuwp_content_syndicate_json', $content, $atts );
 		}
 
 		$local_site_id = false;
