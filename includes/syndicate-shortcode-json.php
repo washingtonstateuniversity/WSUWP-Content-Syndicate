@@ -269,6 +269,16 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 		return $content;
 	}
 
+	/**
+	 * Process REST API results received remotely through `wp_remote_get()`
+	 *
+	 * @since 0.9.0
+	 *
+	 * @param object $data List of post data.
+	 * @param array  $atts Attributes passed with the original shortcode.
+	 *
+	 * @return array Array of objects representing individual posts.
+	 */
 	public function process_remote_posts( $data, $atts ) {
 		$new_data = array();
 		if ( ! empty( $data ) ) {
@@ -347,6 +357,16 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 		return $new_data;
 	}
 
+	/**
+	 * Process REST API results received locally through `rest_do_request()`
+	 *
+	 * @since 0.9.0
+	 *
+	 * @param array $data Array of post data.
+	 * @param array $atts Attributes passed with the original shortcode.
+	 *
+	 * @return array Array of objects representing individual posts.
+	 */
 	public function process_local_posts( $data, $atts ) {
 		if ( empty( $data ) ) {
 			return array();
