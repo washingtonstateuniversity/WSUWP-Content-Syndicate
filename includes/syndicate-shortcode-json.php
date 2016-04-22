@@ -100,6 +100,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 			$new_data = $this->process_local_posts( $response->data, $atts );
 			restore_current_blog();
 		} else {
+			error_log( 'WSUWP Content Syndicate: Remote request made. URL: ' . esc_url( $request_url ) );
 			$response = wp_remote_get( $request_url );
 
 			if ( is_wp_error( $response ) ) {
