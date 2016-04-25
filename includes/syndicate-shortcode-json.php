@@ -97,12 +97,17 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 		}
 
 		$request_url = add_query_arg( array( '_embed' => '' ), $request_url );
+		$new_data = array();
 
 		if ( 'local' === $atts['scheme'] ) {
 			switch_to_blog( $local_site_id );
 			$request = WP_REST_Request::from_url( $request_url );
 			$response = rest_do_request( $request );
-			$new_data = $this->process_local_posts( $response->data, $atts );
+			if ( 200 !== $response->get_status() ) {
+				error_log( 'WSUWP Content Syndicate: Local request error ' . absint( $response->get_status() ) . '. URL: ' . esc_url( $request_url ) );
+			} else {
+				$new_data = $this->process_local_posts( $response->data, $atts );
+			}
 			restore_current_blog();
 		} else {
 			error_log( 'WSUWP Content Syndicate: Remote request made. URL: ' . esc_url( $request_url ) );
@@ -111,6 +116,8 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 			if ( is_wp_error( $response ) ) {
 				$response_error = sanitize_text_field( $response->get_error_message() );
 				error_log( 'WSUWP Content Syndicate: Response WP_Error. Message: ' . $response_error );
+			} elseif( 404 === wp_remote_retrieve_response_code( $response ) ) {
+				error_log( 'WSUWP Content Syndicate: Remote request 404. URL: ' . esc_url( $request_url ) );
 			} else {
 				$data = wp_remote_retrieve_body( $response );
 				$original_data = $data;
