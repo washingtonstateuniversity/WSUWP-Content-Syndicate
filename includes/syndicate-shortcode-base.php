@@ -190,7 +190,9 @@ class WSU_Syndicate_Shortcode_Base {
 	/**
 	 * Explode comma-separated terms into an array, sanitize each term, implode into a string.
 	 *
-	 * @param string $terms Unsanitized comma separated list of terms.
+	 * @since 0.10.0
+	 *
+	 * @param string $terms Comma separated list of terms.
 	 *
 	 * @return string Sanitized comma separated list of terms.
 	 */
