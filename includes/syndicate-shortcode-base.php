@@ -196,15 +196,8 @@ class WSU_Syndicate_Shortcode_Base {
 	 */
 	public function sanitized_terms( $terms ) {
 		$term_array = explode( ',', $terms );
-		$sanitize_term_array = array_map( array( $this, 'sanitize_term' ), $term_array );
+		$sanitize_term_array = array_map( 'sanitize_key', $term_array );
 		$imploded_terms = implode( ',', $sanitize_term_array );
 		return $imploded_terms;
-	}
-
-	/**
-	 * Remove leading or trailing whitespace from and sanitize the term.
-	 */
-	public function sanitize_term( $term ) {
-		return sanitize_key( trim( $term ) );
 	}
 }
