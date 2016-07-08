@@ -160,37 +160,46 @@ class WSU_Syndicate_Shortcode_Base {
 	 */
 	public function build_taxonomy_filters( $atts, $request_url ) {
 		if ( ! empty( $atts['university_category_slug'] ) ) {
-			$request_url = add_query_arg( array(
-				'filter[taxonomy]' => 'wsuwp_university_category',
-				'filter[term]' => sanitize_key( $atts['university_category_slug'] )
-			), $request_url );
+			$terms = $this->sanitized_terms( $atts['university_category_slug'] );
+			$request_url = add_query_arg( array( 'filter[wsuwp_university_category]' => $terms ), $request_url );
 		}
 
 		if ( ! empty( $atts['university_organization_slug'] ) ) {
-			$request_url = add_query_arg( array(
-				'filter[taxonomy]' => 'wsuwp_university_org',
-				'filter[term]' => sanitize_key( $atts['university_organization_slug'] ),
-			), $request_url );
+			$terms = $this->sanitized_terms( $atts['university_organization_slug'] );
+			$request_url = add_query_arg( array( 'filter[wsuwp_university_org]' => $terms ), $request_url );
 		}
 
 		if ( ! empty( $atts['university_location_slug'] ) ) {
-			$request_url = add_query_arg( array(
-				'filter[taxonomy]' => 'wsuwp_university_location',
-				'filter[term]' => sanitize_key( $atts['university_location_slug'] ),
-			), $request_url );
+			$terms = $this->sanitized_terms( $atts['university_location_slug'] );
+			$request_url = add_query_arg( array( 'filter[wsuwp_university_location]' => $terms ), $request_url );
 		}
 
 		if ( ! empty( $atts['site_category_slug'] ) ) {
-			$request_url = add_query_arg( array(
-				'filter[taxonomy]' => 'category',
-				'filter[term]' => sanitize_key( $atts['site_category_slug'] )
-			), $request_url );
+			$terms = $this->sanitized_terms( $atts['site_category_slug'] );
+			$request_url = add_query_arg( array( 'filter[category_name]' => $terms ), $request_url );
 		}
 
 		if ( ! empty( $atts['tag'] ) ) {
-			$request_url = add_query_arg( array( 'filter[tag]' => sanitize_key( $atts['tag'] ) ), $request_url );
+			$terms = $this->sanitized_terms( $atts['tag'] );
+			$request_url = add_query_arg( array( 'filter[tag]' => $terms ), $request_url );
 		}
 
 		return $request_url;
+	}
+
+	/**
+	 * Explode comma-separated terms into an array, sanitize each term, implode into a string.
+	 *
+	 * @since 0.10.0
+	 *
+	 * @param string $terms Comma separated list of terms.
+	 *
+	 * @return string Sanitized comma separated list of terms.
+	 */
+	public function sanitized_terms( $terms ) {
+		$term_array = explode( ',', $terms );
+		$sanitize_term_array = array_map( 'sanitize_key', $term_array );
+		$imploded_terms = implode( ',', $sanitize_term_array );
+		return $imploded_terms;
 	}
 }
