@@ -62,9 +62,6 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 		}
 
 		$request = $this->build_initial_request( $site_url, $atts );
-		$request_scheme = $request['scheme'];
-		$local_site_id = $request['site_id'];
-
 		$request_url = $this->build_taxonomy_filters( $atts, $request['url'] );
 
 		if ( ! empty( $atts['offset'] ) ) {
@@ -78,9 +75,9 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 		$request_url = add_query_arg( array( '_embed' => '' ), $request_url );
 		$new_data = array();
 
-		if ( 'local' === $request_scheme ) {
+		if ( 'local' === $request['scheme'] ) {
 			if ( is_multisite() ) {
-				switch_to_blog( $local_site_id );
+				switch_to_blog( $request['site_id'] );
 			}
 
 			$request = WP_REST_Request::from_url( $request_url );
