@@ -61,32 +61,8 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 			return apply_filters( 'wsuwp_content_syndicate_json', $content, $atts );
 		}
 
-		$url_scheme = 'http';
-		$local_site_id = false;
-		// If local results were requested, verify the site is local first and switch back to HTTP if
-		// it is not. If remote results were requested, and this is multisite, check for a local site anyway.
-		if ( 'local' === $atts['scheme'] ) {
-			$local_site = get_blog_details( array( 'domain' => $site_url['host'], 'path' => $site_url['path'] ), false );
-			if ( $local_site ) {
-				$local_site_id = $local_site->blog_id;
-				$local_home_url = get_home_url( $local_site_id );
-				$url_scheme = parse_url( $local_home_url, PHP_URL_SCHEME );
-			} else {
-				$atts['scheme'] = 'http';
-			}
-		} elseif( is_multisite() ) {
-			$local_site = get_blog_details( array( 'domain' => $site_url['host'], 'path' => $site_url['path'] ), false );
-			if ( $local_site ) {
-				$local_site_id = $local_site->blog_id;
-				$local_home_url = get_home_url( $local_site_id );
-				$url_scheme = parse_url( $local_home_url, PHP_URL_SCHEME );
-				$atts['scheme'] = 'local';
-			}
-		}
-
-		$request_url = esc_url( $url_scheme . '://' . $site_url['host'] . $site_url['path'] . $this->default_path ) . $atts['query'];
-
-		$request_url = $this->build_taxonomy_filters( $atts, $request_url );
+		$request = $this->build_initial_request( $site_url, $atts );
+		$request_url = $this->build_taxonomy_filters( $atts, $request['url'] );
 
 		if ( ! empty( $atts['offset'] ) ) {
 			$atts['count'] = absint( $atts['count'] ) + absint( $atts['offset'] );
@@ -99,8 +75,11 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 		$request_url = add_query_arg( array( '_embed' => '' ), $request_url );
 		$new_data = array();
 
-		if ( 'local' === $atts['scheme'] ) {
-			switch_to_blog( $local_site_id );
+		if ( 'local' === $request['scheme'] ) {
+			if ( is_multisite() ) {
+				switch_to_blog( $request['site_id'] );
+			}
+
 			$request = WP_REST_Request::from_url( $request_url );
 			$response = rest_do_request( $request );
 			if ( 200 !== $response->get_status() ) {
@@ -108,7 +87,10 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 			} else {
 				$new_data = $this->process_local_posts( $response->data, $atts );
 			}
-			restore_current_blog();
+
+			if ( is_multisite() ) {
+				restore_current_blog();
+			}
 		} else {
 			error_log( 'WSUWP Content Syndicate: Remote request made. URL: ' . esc_url( $request_url ) );
 			$response = wp_remote_get( $request_url );
