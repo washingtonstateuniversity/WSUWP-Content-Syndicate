@@ -66,7 +66,7 @@ class WSU_Syndicate_Shortcode_Events extends WSU_Syndicate_Shortcode_Base {
 			$request_url = add_query_arg( array( 'filter[tag]' => sanitize_key( $atts['tag'] ) ), $request_url );
 		}
 
-		if ( $atts['count'] ) {
+		if ( 0 !== absint( $atts['count'] ) ) {
 			$request_url = add_query_arg( array( 'per_page' => absint( $atts['count'] ) ), $request_url );
 		}
 
