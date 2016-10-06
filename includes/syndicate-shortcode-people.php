@@ -46,8 +46,8 @@ class WSU_Syndicate_Shortcode_People extends WSU_Syndicate_Shortcode_Base {
 		$request_url = esc_url( $site_url['host'] . $site_url['path'] . $this->default_path ) . $atts['query'];
 		$request_url = $this->build_taxonomy_filters( $atts, $request_url );
 
-		if ( 0 !== absint( $atts['count'] ) ) {
-			$request_url = add_query_arg( array( 'per_page' => absint( $atts['count'] ) ), $request_url );
+		if ( $atts['count'] ) {
+			$request_url = add_query_arg( array( 'filter[posts_per_page]' => absint( $atts['count'] ) ), $request_url );
 		}
 
 		$response = wp_remote_get( $request_url );
