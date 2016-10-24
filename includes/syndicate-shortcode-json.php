@@ -69,7 +69,8 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 		}
 
 		if ( $atts['count'] ) {
-			$request_url = add_query_arg( array( 'filter[posts_per_page]' => absint( $atts['count'] ) ), $request_url );
+			$count = ( 100 < absint( $atts['count'] ) ) ? 100 : $atts['count'];
+			$request_url = add_query_arg( array( 'per_page' => absint( $count ) ), $request_url );
 		}
 
 		$request_url = add_query_arg( array( '_embed' => '' ), $request_url );
