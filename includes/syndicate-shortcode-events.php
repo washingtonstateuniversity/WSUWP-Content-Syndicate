@@ -56,7 +56,7 @@ class WSU_Syndicate_Shortcode_Events extends WSU_Syndicate_Shortcode_Base {
 			$request_url = add_query_arg( array( 'filter[taxonomy]' => 'tribe_events_cat' ), $request_url );
 
 			$terms = explode( ',', $atts['category'] );
-			foreach( $terms as $term ) {
+			foreach ( $terms as $term ) {
 				$term = trim( $term );
 				$request_url = add_query_arg( array( 'filter[term]' => sanitize_key( $term ) ), $request_url );
 			}
@@ -80,7 +80,7 @@ class WSU_Syndicate_Shortcode_Events extends WSU_Syndicate_Shortcode_Base {
 			$original_data = $data;
 			$data = json_decode( $data );
 
-			if ( NULL === $data ) {
+			if ( null === $data ) {
 				$original_type = gettype( $original_data );
 				error_log( 'WSUWP Content Syndicate: Null JSON. Original type: ' . $original_type );
 				error_log( 'WSUWP Content Syndicate: Original URL: ' . esc_url( $request_url ) );
@@ -88,7 +88,7 @@ class WSU_Syndicate_Shortcode_Events extends WSU_Syndicate_Shortcode_Base {
 				$data = array();
 			}
 
-			foreach( $data as $post ) {
+			foreach ( $data as $post ) {
 				$subset = new StdClass();
 				$subset->ID = $post->id;
 				$subset->title = $post->title->rendered;
@@ -118,10 +118,10 @@ class WSU_Syndicate_Shortcode_Events extends WSU_Syndicate_Shortcode_Base {
 			<div class="wsuwp-content-syndicate-wrapper">
 				<ul class="wsuwp-content-syndicate-list">
 					<?php
-					foreach( $new_data as $content ) {
+					foreach ( $new_data as $content ) {
 						?>
 						<li class="wsuwp-content-syndicate-event">
-						<span class="content-item-event-date"><?php echo date( $atts['date_format'], strtotime( $content->start_date ) ); ?></span>
+						<span class="content-item-event-date"><?php echo esc_html( date( $atts['date_format'], strtotime( $content->start_date ) ) ); ?></span>
 						<span class="content-item-event-title"><a href="<?php echo esc_url( $content->link ); ?>"><?php echo esc_html( $content->title ); ?></a></span>
 							<span class="content-item-event-meta">
 								<span class="content-item-event-venue"><?php echo esc_html( $content->event_venue ); ?></span>

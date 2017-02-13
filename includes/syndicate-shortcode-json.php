@@ -90,14 +90,14 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 			if ( is_wp_error( $response ) ) {
 				$response_error = sanitize_text_field( $response->get_error_message() );
 				error_log( 'WSUWP Content Syndicate: Response WP_Error. Message: ' . $response_error );
-			} elseif( 404 === wp_remote_retrieve_response_code( $response ) ) {
+			} elseif ( 404 === wp_remote_retrieve_response_code( $response ) ) {
 				error_log( 'WSUWP Content Syndicate: Remote request 404. URL: ' . esc_url( $request_url ) );
 			} else {
 				$data = wp_remote_retrieve_body( $response );
 				$original_data = $data;
 				$data = json_decode( $data );
 
-				if ( NULL === $data ) {
+				if ( null === $data ) {
 					$original_type = gettype( $original_data );
 					error_log( 'WSUWP Content Syndicate: Null JSON. Original type: ' . $original_type );
 					error_log( 'WSUWP Content Syndicate: Original URL: ' . esc_url( $request_url ) );
@@ -158,7 +158,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 				}
 				$new_data[ $subset_key ] = $subset;
 			}
-			wp_reset_query();
+			wp_reset_postdata();
 		}
 
 		// Reverse sort the array of data by date.
@@ -173,20 +173,20 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 		ob_start();
 		// By default, we output a JSON object that can then be used by a script.
 		if ( 'json' === $atts['output'] ) {
-			$data = json_encode( $new_data );
-			echo '<script>var ' . esc_js( $atts['object'] ) . ' = ' . $data . ';</script>';
+			$data = wp_json_encode( $new_data );
+			echo '<script>var ' . esc_js( $atts['object'] ) . ' = ' . esc_attr( $data ) . ';</script>';
 		} elseif ( 'headlines' === $atts['output'] ) {
 			?>
 			<div class="wsuwp-content-syndicate-wrapper">
 				<ul class="wsuwp-content-syndicate-list">
 					<?php
 					$offset_x = 0;
-					foreach( $new_data as $content ) {
+					foreach ( $new_data as $content ) {
 						if ( $offset_x < absint( $atts['offset'] ) ) {
 							$offset_x++;
 							continue;
 						}
-						?><li class="wsuwp-content-syndicate-item"><a href="<?php echo $content->link; ?>"><?php echo $content->title; ?></a></li><?php
+						?><li class="wsuwp-content-syndicate-item"><a href="<?php echo esc_url( $content->link ); ?>"><?php echo esc_html( $content->title ); ?></a></li><?php
 					}
 					?>
 				</ul>
@@ -198,20 +198,20 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 				<ul class="wsuwp-content-syndicate-list">
 					<?php
 					$offset_x = 0;
-					foreach( $new_data as $content ) {
+					foreach ( $new_data as $content ) {
 						if ( $offset_x < absint( $atts['offset'] ) ) {
 							$offset_x++;
 							continue;
 						}
 						?>
 						<li class="wsuwp-content-syndicate-item">
-							<span class="content-item-thumbnail"><?php if ( $content->thumbnail ) : ?><img src="<?php echo $content->thumbnail; ?>"><?php endif; ?></span>
-							<span class="content-item-title"><a href="<?php echo $content->link; ?>"><?php echo $content->title; ?></a></span>
+							<span class="content-item-thumbnail"><?php if ( $content->thumbnail ) : ?><img src="<?php echo esc_url( $content->thumbnail ); ?>"><?php endif; ?></span>
+							<span class="content-item-title"><a href="<?php echo esc_url( $content->link ); ?>"><?php echo esc_html( $content->title ); ?></a></span>
 							<span class="content-item-byline">
-								<span class="content-item-byline-date"><?php echo date( $atts['date_format'], strtotime( $content->date ) ); ?></span>
-								<span class="content-item-byline-author"><?php echo $content->author_name; ?></span>
+								<span class="content-item-byline-date"><?php echo esc_html( date( $atts['date_format'], strtotime( $content->date ) ) ); ?></span>
+								<span class="content-item-byline-author"><?php echo esc_html( $content->author_name ); ?></span>
 							</span>
-							<span class="content-item-excerpt"><?php echo $content->excerpt; ?> <a class="content-item-read-story" href="<?php echo $content->link; ?>">Read Story</a></span>
+							<span class="content-item-excerpt"><?php echo wp_kses_post( $content->excerpt ); ?> <a class="content-item-read-story" href="<?php echo esc_url( $content->link ); ?>">Read Story</a></span>
 						</li>
 						<?php
 					}
@@ -237,7 +237,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 							</span>
 							<span class="content-item-title"><a href="<?php echo esc_url( $content->link ); ?>"><?php echo esc_html( $content->title ); ?></a></span>
 							<span class="content-item-byline">
-								<span class="content-item-byline-date"><?php echo date( $atts['date_format'], strtotime( $content->date ) ); ?></span>
+								<span class="content-item-byline-date"><?php echo esc_html( date( $atts['date_format'], strtotime( $content->date ) ) ); ?></span>
 								<span class="content-item-byline-author"><?php echo esc_html( $content->author_name ); ?></span>
 							</span>
 							<div class="content-item-content">
@@ -283,7 +283,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 
 		$new_data = array();
 
-		foreach( $data as $post ) {
+		foreach ( $data as $post ) {
 			$subset = new StdClass();
 			$subset->ID = $post->id;
 			$subset->date = $post->date; // In time zone of requested site
@@ -362,7 +362,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 
 		$new_data = array();
 
-		foreach( $data as $post ) {
+		foreach ( $data as $post ) {
 			$subset = new stdClass();
 			$subset->ID = $post['id'];
 			$subset->date = $post['date']; // In time zone of requested site
@@ -373,7 +373,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 			$subset->content = $post['content']['rendered'];
 			$subset->excerpt = $post['excerpt']['rendered'];
 
-			if ( ! empty ( $post['featured_media'] ) && ! empty( $post['_links']['wp:featuredmedia'] ) ) {
+			if ( ! empty( $post['featured_media'] ) && ! empty( $post['_links']['wp:featuredmedia'] ) ) {
 				$media_request_url = $post['_links']['wp:featuredmedia'][0]['href'];
 				$media_request = WP_REST_Request::from_url( $media_request_url );
 				$media_response = rest_do_request( $media_request );
@@ -382,7 +382,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 
 				if ( isset( $data['post-thumbnail'] ) ) {
 					$subset->thumbnail = $data['post-thumbnail']['source_url'];
-				} elseif( isset( $data['thumbnail'] ) ) {
+				} elseif ( isset( $data['thumbnail'] ) ) {
 					$subset->thumbnail = $data['thumbnail']['source_url'];
 				} else {
 					$subset->thumbnail = $media_response->data['source_url'];
