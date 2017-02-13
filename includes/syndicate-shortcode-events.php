@@ -121,7 +121,7 @@ class WSU_Syndicate_Shortcode_Events extends WSU_Syndicate_Shortcode_Base {
 					foreach ( $new_data as $content ) {
 						?>
 						<li class="wsuwp-content-syndicate-event">
-						<span class="content-item-event-date"><?php echo date( $atts['date_format'], strtotime( $content->start_date ) ); ?></span>
+						<span class="content-item-event-date"><?php echo esc_html( date( $atts['date_format'], strtotime( $content->start_date ) ) ); ?></span>
 						<span class="content-item-event-title"><a href="<?php echo esc_url( $content->link ); ?>"><?php echo esc_html( $content->title ); ?></a></span>
 							<span class="content-item-event-meta">
 								<span class="content-item-event-venue"><?php echo esc_html( $content->event_venue ); ?></span>
