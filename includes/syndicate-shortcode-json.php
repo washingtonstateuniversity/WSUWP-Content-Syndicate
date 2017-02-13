@@ -158,7 +158,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 				}
 				$new_data[ $subset_key ] = $subset;
 			}
-			wp_reset_query();
+			wp_reset_postdata();
 		}
 
 		// Reverse sort the array of data by date.
@@ -173,8 +173,8 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 		ob_start();
 		// By default, we output a JSON object that can then be used by a script.
 		if ( 'json' === $atts['output'] ) {
-			$data = json_encode( $new_data );
-			echo '<script>var ' . esc_js( $atts['object'] ) . ' = ' . $data . ';</script>';
+			$data = wp_json_encode( $new_data );
+			echo '<script>var ' . esc_js( $atts['object'] ) . ' = ' . esc_attr( $data ) . ';</script>';
 		} elseif ( 'headlines' === $atts['output'] ) {
 			?>
 			<div class="wsuwp-content-syndicate-wrapper">
@@ -186,7 +186,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 							$offset_x++;
 							continue;
 						}
-						?><li class="wsuwp-content-syndicate-item"><a href="<?php echo $content->link; ?>"><?php echo $content->title; ?></a></li><?php
+						?><li class="wsuwp-content-syndicate-item"><a href="<?php echo esc_url( $content->link ); ?>"><?php echo esc_html( $content->title ); ?></a></li><?php
 					}
 					?>
 				</ul>
@@ -205,13 +205,13 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 						}
 						?>
 						<li class="wsuwp-content-syndicate-item">
-							<span class="content-item-thumbnail"><?php if ( $content->thumbnail ) : ?><img src="<?php echo $content->thumbnail; ?>"><?php endif; ?></span>
-							<span class="content-item-title"><a href="<?php echo $content->link; ?>"><?php echo $content->title; ?></a></span>
+							<span class="content-item-thumbnail"><?php if ( $content->thumbnail ) : ?><img src="<?php echo esc_url( $content->thumbnail ); ?>"><?php endif; ?></span>
+							<span class="content-item-title"><a href="<?php echo esc_url( $content->link ); ?>"><?php echo esc_html( $content->title ); ?></a></span>
 							<span class="content-item-byline">
-								<span class="content-item-byline-date"><?php echo date( $atts['date_format'], strtotime( $content->date ) ); ?></span>
-								<span class="content-item-byline-author"><?php echo $content->author_name; ?></span>
+								<span class="content-item-byline-date"><?php echo esc_html( date( $atts['date_format'], strtotime( $content->date ) ) ); ?></span>
+								<span class="content-item-byline-author"><?php echo esc_html( $content->author_name ); ?></span>
 							</span>
-							<span class="content-item-excerpt"><?php echo $content->excerpt; ?> <a class="content-item-read-story" href="<?php echo $content->link; ?>">Read Story</a></span>
+							<span class="content-item-excerpt"><?php echo wp_kses_post( $content->excerpt ); ?> <a class="content-item-read-story" href="<?php echo esc_url( $content->link ); ?>">Read Story</a></span>
 						</li>
 						<?php
 					}
@@ -237,7 +237,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 							</span>
 							<span class="content-item-title"><a href="<?php echo esc_url( $content->link ); ?>"><?php echo esc_html( $content->title ); ?></a></span>
 							<span class="content-item-byline">
-								<span class="content-item-byline-date"><?php echo date( $atts['date_format'], strtotime( $content->date ) ); ?></span>
+								<span class="content-item-byline-date"><?php echo esc_html( date( $atts['date_format'], strtotime( $content->date ) ) ); ?></span>
 								<span class="content-item-byline-author"><?php echo esc_html( $content->author_name ); ?></span>
 							</span>
 							<div class="content-item-content">
