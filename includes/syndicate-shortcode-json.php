@@ -77,10 +77,6 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 		$new_data = array();
 
 		if ( 'local' === $request['scheme'] ) {
-			if ( is_multisite() ) {
-				switch_to_blog( $request['site_id'] );
-			}
-
 			$request = WP_REST_Request::from_url( $request_url );
 			$response = rest_do_request( $request );
 			if ( 200 !== $response->get_status() ) {
@@ -88,12 +84,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 			} else {
 				$new_data = $this->process_local_posts( $response->data, $atts );
 			}
-
-			if ( is_multisite() ) {
-				restore_current_blog();
-			}
 		} else {
-			error_log( 'WSUWP Content Syndicate: Remote request made. URL: ' . esc_url( $request_url ) );
 			$response = wp_remote_get( $request_url );
 
 			if ( is_wp_error( $response ) ) {

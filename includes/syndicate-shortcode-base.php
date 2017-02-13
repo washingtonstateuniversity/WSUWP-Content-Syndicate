@@ -22,7 +22,7 @@ class WSU_Syndicate_Shortcode_Base {
 		'object' => 'json_data',
 		'output' => 'json',
 		'host' => 'news.wsu.edu',
-		'scheme' => 'local',
+		'scheme' => 'http',
 		'site' => '',
 		'university_category_slug' => '',
 		'university_organization_slug' => '',
@@ -126,12 +126,8 @@ class WSU_Syndicate_Shortcode_Base {
 	}
 
 	/**
-	 * Process a given site URL and shortcode attributes into data to be used for the
+	 * Processes a given site URL and shortcode attributes into data to be used for the
 	 * request.
-	 *
-	 * If "http" or "https" is provided as scheme, then assume a remote request. If anything else
-	 * is passed ("local" by default), then verify the site is local and switch back to HTTP if
-	 * it is not.
 	 *
 	 * @since 0.10.0
 	 *
@@ -144,8 +140,19 @@ class WSU_Syndicate_Shortcode_Base {
 		$url_scheme = 'http';
 		$local_site_id = false;
 
-		if ( in_array( $atts['scheme'], array( 'http', 'https' ) ) ) {
-			$url_scheme = $atts['scheme'];
+		// Account for a previous version that allowed "local" as a manual scheme.
+		if ( 'local' === $atts['scheme'] ) {
+			$atts['scheme'] = 'http';
+		}
+
+		$home_url_data = parse_url( trailingslashit( get_home_url() ) );
+
+		if ( $home_url_data['host'] === $site_url['host'] && $home_url_data['path'] === $site_url['path'] ) {
+			$local_site_id = 1;
+			$url_scheme = $home_url_data['scheme'];
+
+			// Local is assigned as a scheme only if the requesting site is the requested site.
+			$atts['scheme'] = 'local';
 		} elseif ( is_multisite() ) {
 			$local_site = get_blog_details( array( 'domain' => $site_url['host'], 'path' => $site_url['path'] ), false );
 
@@ -153,17 +160,6 @@ class WSU_Syndicate_Shortcode_Base {
 				$local_site_id = $local_site->blog_id;
 				$local_home_url = get_home_url( $local_site_id );
 				$url_scheme = parse_url( $local_home_url, PHP_URL_SCHEME );
-			} else {
-				$atts['scheme'] = 'http';
-			}
-		} else {
-			$home_url_data = parse_url( get_home_url() );
-			$url_scheme = $home_url_data['scheme'];
-
-			if ( $home_url_data['host'] === $site_url['host'] && $home_url_data['path'] === $site_url['path'] ) {
-				$local_site_id = 1;
-				$atts['scheme'] = 'local';
-			} else {
 				$atts['scheme'] = $url_scheme;
 			}
 		}
