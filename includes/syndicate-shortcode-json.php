@@ -90,14 +90,14 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 			if ( is_wp_error( $response ) ) {
 				$response_error = sanitize_text_field( $response->get_error_message() );
 				error_log( 'WSUWP Content Syndicate: Response WP_Error. Message: ' . $response_error );
-			} elseif( 404 === wp_remote_retrieve_response_code( $response ) ) {
+			} elseif ( 404 === wp_remote_retrieve_response_code( $response ) ) {
 				error_log( 'WSUWP Content Syndicate: Remote request 404. URL: ' . esc_url( $request_url ) );
 			} else {
 				$data = wp_remote_retrieve_body( $response );
 				$original_data = $data;
 				$data = json_decode( $data );
 
-				if ( NULL === $data ) {
+				if ( null === $data ) {
 					$original_type = gettype( $original_data );
 					error_log( 'WSUWP Content Syndicate: Null JSON. Original type: ' . $original_type );
 					error_log( 'WSUWP Content Syndicate: Original URL: ' . esc_url( $request_url ) );
@@ -181,7 +181,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 				<ul class="wsuwp-content-syndicate-list">
 					<?php
 					$offset_x = 0;
-					foreach( $new_data as $content ) {
+					foreach ( $new_data as $content ) {
 						if ( $offset_x < absint( $atts['offset'] ) ) {
 							$offset_x++;
 							continue;
@@ -198,7 +198,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 				<ul class="wsuwp-content-syndicate-list">
 					<?php
 					$offset_x = 0;
-					foreach( $new_data as $content ) {
+					foreach ( $new_data as $content ) {
 						if ( $offset_x < absint( $atts['offset'] ) ) {
 							$offset_x++;
 							continue;
@@ -283,7 +283,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 
 		$new_data = array();
 
-		foreach( $data as $post ) {
+		foreach ( $data as $post ) {
 			$subset = new StdClass();
 			$subset->ID = $post->id;
 			$subset->date = $post->date; // In time zone of requested site
@@ -362,7 +362,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 
 		$new_data = array();
 
-		foreach( $data as $post ) {
+		foreach ( $data as $post ) {
 			$subset = new stdClass();
 			$subset->ID = $post['id'];
 			$subset->date = $post['date']; // In time zone of requested site
@@ -373,7 +373,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 			$subset->content = $post['content']['rendered'];
 			$subset->excerpt = $post['excerpt']['rendered'];
 
-			if ( ! empty ( $post['featured_media'] ) && ! empty( $post['_links']['wp:featuredmedia'] ) ) {
+			if ( ! empty( $post['featured_media'] ) && ! empty( $post['_links']['wp:featuredmedia'] ) ) {
 				$media_request_url = $post['_links']['wp:featuredmedia'][0]['href'];
 				$media_request = WP_REST_Request::from_url( $media_request_url );
 				$media_response = rest_do_request( $media_request );
@@ -382,7 +382,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 
 				if ( isset( $data['post-thumbnail'] ) ) {
 					$subset->thumbnail = $data['post-thumbnail']['source_url'];
-				} elseif( isset( $data['thumbnail'] ) ) {
+				} elseif ( isset( $data['thumbnail'] ) ) {
 					$subset->thumbnail = $data['thumbnail']['source_url'];
 				} else {
 					$subset->thumbnail = $media_response->data['source_url'];

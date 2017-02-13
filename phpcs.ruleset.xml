@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<ruleset name="WSUWP Plugins">
+    <description>Sniffs for PHP coding standards used by WSUWP Plugins</description>
+
+    <rule ref="WordPress-Extra">
+        <exclude name="WordPress.NamingConventions.ValidFunctionName" />
+    </rule>
+</ruleset>

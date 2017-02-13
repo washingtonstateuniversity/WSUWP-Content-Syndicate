@@ -1,0 +1,16 @@
+{
+  "name": "wsuwp-content-syndicate",
+  "version": "0.10.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/washingtonstateuniversity/wsuwp-content-syndicate"
+  },
+  "author": "washingtonstateuniversity",
+  "license": "GPL-2.0+",
+  "devDependencies": {
+    "grunt": "~1.0.1",
+    "grunt-contrib-jshint": "^1.0.0",
+    "grunt-jscs": "^3.0.1",
+    "grunt-phpcs": "^0.4.0"
+  }
+}
