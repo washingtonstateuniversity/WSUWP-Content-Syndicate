@@ -1,6 +1,6 @@
 <?php
 /*
-Plugin Name: WSU Content Syndicate
+Plugin Name: WSUWP Content Syndicate
 Plugin URI: https://web.wsu.edu/wordpress/plugins/wsuwp-content-syndicate/
 Description: Retrieve content for display from throughout Washington State University
 Author: washingtonstateuniversity, jeremyfelt
