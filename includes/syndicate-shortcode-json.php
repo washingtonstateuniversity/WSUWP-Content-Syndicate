@@ -173,8 +173,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 		ob_start();
 		// By default, we output a JSON object that can then be used by a script.
 		if ( 'json' === $atts['output'] ) {
-			$data = wp_json_encode( $new_data );
-			echo '<script>var ' . esc_js( $atts['object'] ) . ' = ' . esc_attr( $data ) . ';</script>';
+			echo '<script>var ' . esc_js( $atts['object'] ) . ' = ' . wp_json_encode( $new_data ) . ';</script>';
 		} elseif ( 'headlines' === $atts['output'] ) {
 			?>
 			<div class="wsuwp-content-syndicate-wrapper">
