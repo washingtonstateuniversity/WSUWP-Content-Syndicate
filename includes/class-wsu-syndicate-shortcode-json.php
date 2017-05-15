@@ -52,12 +52,14 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 	public function display_shortcode( $atts ) {
 		$atts = $this->process_attributes( $atts );
 
-		if ( ! $site_url = $this->get_request_url( $atts ) ) {
+		$site_url = $this->get_request_url( $atts );
+		if ( ! $site_url ) {
 			return '<!-- wsuwp_json ERROR - an empty host was supplied -->';
 		}
 
 		// Retrieve existing content from cache if available.
-		if ( $content = $this->get_content_cache( $atts, 'wsuwp_json' ) ) {
+		$content = $this->get_content_cache( $atts, 'wsuwp_json' );
+		if ( $content ) {
 			return apply_filters( 'wsuwp_content_syndicate_json', $content, $atts );
 		}
 
@@ -70,38 +72,31 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 
 		if ( $atts['count'] ) {
 			$count = ( 100 < absint( $atts['count'] ) ) ? 100 : $atts['count'];
-			$request_url = add_query_arg( array( 'per_page' => absint( $count ) ), $request_url );
+			$request_url = add_query_arg( array(
+				'per_page' => absint( $count ),
+			), $request_url );
 		}
 
-		$request_url = add_query_arg( array( '_embed' => '' ), $request_url );
+		$request_url = add_query_arg( array(
+			'_embed' => '',
+		), $request_url );
+
 		$new_data = array();
 
 		if ( 'local' === $request['scheme'] ) {
 			$request = WP_REST_Request::from_url( $request_url );
 			$response = rest_do_request( $request );
-			if ( 200 !== $response->get_status() ) {
-				error_log( 'WSUWP Content Syndicate: Local request error ' . absint( $response->get_status() ) . '. URL: ' . esc_url( $request_url ) );
-			} else {
+			if ( 200 === $response->get_status() ) {
 				$new_data = $this->process_local_posts( $response->data, $atts );
 			}
 		} else {
 			$response = wp_remote_get( $request_url );
 
-			if ( is_wp_error( $response ) ) {
-				$response_error = sanitize_text_field( $response->get_error_message() );
-				error_log( 'WSUWP Content Syndicate: Response WP_Error. Message: ' . $response_error );
-			} elseif ( 404 === wp_remote_retrieve_response_code( $response ) ) {
-				error_log( 'WSUWP Content Syndicate: Remote request 404. URL: ' . esc_url( $request_url ) );
-			} else {
+			if ( ! is_wp_error( $response ) && 404 !== wp_remote_retrieve_response_code( $response ) ) {
 				$data = wp_remote_retrieve_body( $response );
-				$original_data = $data;
 				$data = json_decode( $data );
 
 				if ( null === $data ) {
-					$original_type = gettype( $original_data );
-					error_log( 'WSUWP Content Syndicate: Null JSON. Original type: ' . $original_type );
-					error_log( 'WSUWP Content Syndicate: Original URL: ' . esc_url( $request_url ) );
-					error_log( 'WSUWP Content Syndicate: Original Response Code: ' . wp_remote_retrieve_response_code( $response ) );
 					$data = array();
 				}
 
@@ -110,7 +105,10 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 		}
 
 		if ( 0 !== absint( $atts['local_count'] ) ) {
-			$news_query_args = array( 'post_type' => 'post', 'posts_per_page' => absint( $atts['local_count'] ) );
+			$news_query_args = array(
+				'post_type' => 'post',
+				'posts_per_page' => absint( $atts['local_count'] ),
+			);
 			$news_query = new WP_Query( $news_query_args );
 
 			while ( $news_query->have_posts() ) {
@@ -157,9 +155,9 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 					$subset_key++;
 				}
 				$new_data[ $subset_key ] = $subset;
-			}
+			} // End while().
 			wp_reset_postdata();
-		}
+		} // End if().
 
 		// Reverse sort the array of data by date.
 		krsort( $new_data );
@@ -249,13 +247,9 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 				</div>
 			</div>
 			<?php
-		}
+		} // End if().
 		$content = ob_get_contents();
 		ob_end_clean();
-
-		if ( empty( $content ) ) {
-			error_log( 'WSUWP Content Syndicate: Empty content after output buffering.' );
-		}
 
 		// Store the built content in cache for repeated use.
 		$this->set_content_cache( $atts, 'wsuwp_json', $content );
@@ -339,7 +333,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 				$subset_key++;
 			}
 			$new_data[ $subset_key ] = $subset;
-		}
+		} // End foreach().
 
 		return $new_data;
 	}
@@ -425,7 +419,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 				$subset_key++;
 			}
 			$new_data[ $subset_key ] = $subset;
-		}
+		} // End foreach().
 
 		return $new_data;
 	}

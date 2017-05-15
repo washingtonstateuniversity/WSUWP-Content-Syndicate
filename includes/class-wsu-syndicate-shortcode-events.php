@@ -41,34 +41,44 @@ class WSU_Syndicate_Shortcode_Events extends WSU_Syndicate_Shortcode_Base {
 	public function display_shortcode( $atts ) {
 		$atts = $this->process_attributes( $atts );
 
-		if ( ! $site_url = $this->get_request_url( $atts ) ) {
+		$site_url = $this->get_request_url( $atts );
+		if ( ! $site_url ) {
 			return '<!-- wsuwp_events ERROR - an empty host was supplied -->';
 		}
 
 		// Retrieve existing content from cache if available.
-		if ( $content = $this->get_content_cache( $atts, 'wsuwp_events' ) ) {
+		$content = $this->get_content_cache( $atts, 'wsuwp_events' );
+		if ( $content ) {
 			return apply_filters( 'wsuwp_content_syndicate_json', $content, $atts );
 		}
 
 		$request_url = esc_url( $site_url['host'] . $site_url['path'] . $this->default_path ) . $atts['query'];
 
 		if ( '' !== $atts['category'] ) {
-			$request_url = add_query_arg( array( 'filter[taxonomy]' => 'tribe_events_cat' ), $request_url );
+			$request_url = add_query_arg( array(
+				'filter[taxonomy]' => 'tribe_events_cat',
+			), $request_url );
 
 			$terms = explode( ',', $atts['category'] );
 			foreach ( $terms as $term ) {
 				$term = trim( $term );
-				$request_url = add_query_arg( array( 'filter[term]' => sanitize_key( $term ) ), $request_url );
+				$request_url = add_query_arg( array(
+					'filter[term]' => sanitize_key( $term ),
+				), $request_url );
 			}
 		}
 
 		if ( ! empty( $atts['tag'] ) ) {
-			$request_url = add_query_arg( array( 'filter[tag]' => sanitize_key( $atts['tag'] ) ), $request_url );
+			$request_url = add_query_arg( array(
+				'filter[tag]' => sanitize_key( $atts['tag'] ),
+			), $request_url );
 		}
 
 		if ( $atts['count'] ) {
 			$count = ( 100 < absint( $atts['count'] ) ) ? 100 : $atts['count'];
-			$request_url = add_query_arg( array( 'per_page' => absint( $count ) ), $request_url );
+			$request_url = add_query_arg( array(
+				'per_page' => absint( $count ),
+			), $request_url );
 		}
 
 		$response = wp_remote_get( $request_url );
@@ -77,14 +87,9 @@ class WSU_Syndicate_Shortcode_Events extends WSU_Syndicate_Shortcode_Base {
 
 		$new_data = array();
 		if ( ! empty( $data ) ) {
-			$original_data = $data;
 			$data = json_decode( $data );
 
 			if ( null === $data ) {
-				$original_type = gettype( $original_data );
-				error_log( 'WSUWP Content Syndicate: Null JSON. Original type: ' . $original_type );
-				error_log( 'WSUWP Content Syndicate: Original URL: ' . esc_url( $request_url ) );
-				error_log( 'WSUWP Content Syndicate: Original Response Code: ' . wp_remote_retrieve_response_code( $response ) );
 				$data = array();
 			}
 

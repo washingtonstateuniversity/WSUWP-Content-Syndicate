@@ -105,7 +105,7 @@ class WSU_Syndicate_Shortcode_Base {
 	 * @return bool|string False if cache is not available or expired. Content if available.
 	 */
 	public function get_content_cache( $atts, $shortcode ) {
-		$atts_key = md5( serialize( $atts ) );
+		$atts_key = md5( serialize( $atts ) ); // @codingStandardsIgnoreLine
 
 		$content = wp_cache_get( $atts_key, $shortcode );
 
@@ -120,7 +120,7 @@ class WSU_Syndicate_Shortcode_Base {
 	 * @param string $content   Generated content after processing the shortcode.
 	 */
 	public function set_content_cache( $atts, $shortcode, $content ) {
-		$atts_key = md5( serialize( $atts ) );
+		$atts_key = md5( serialize( $atts ) ); // @codingStandardsIgnoreLine
 
 		wp_cache_set( $atts_key, $content, $shortcode, 600 );
 	}
@@ -145,7 +145,7 @@ class WSU_Syndicate_Shortcode_Base {
 			$atts['scheme'] = 'http';
 		}
 
-		$home_url_data = parse_url( trailingslashit( get_home_url() ) );
+		$home_url_data = wp_parse_url( trailingslashit( get_home_url() ) );
 
 		if ( $home_url_data['host'] === $site_url['host'] && $home_url_data['path'] === $site_url['path'] ) {
 			$local_site_id = 1;
@@ -154,12 +154,15 @@ class WSU_Syndicate_Shortcode_Base {
 			// Local is assigned as a scheme only if the requesting site is the requested site.
 			$atts['scheme'] = 'local';
 		} elseif ( is_multisite() ) {
-			$local_site = get_blog_details( array( 'domain' => $site_url['host'], 'path' => $site_url['path'] ), false );
+			$local_site = get_blog_details( array(
+				'domain' => $site_url['host'],
+				'path' => $site_url['path'],
+			), false );
 
 			if ( $local_site ) {
 				$local_site_id = $local_site->blog_id;
 				$local_home_url = get_home_url( $local_site_id );
-				$url_scheme = parse_url( $local_home_url, PHP_URL_SCHEME );
+				$url_scheme = wp_parse_url( $local_home_url, PHP_URL_SCHEME );
 				$atts['scheme'] = $url_scheme;
 			}
 		}
@@ -190,7 +193,7 @@ class WSU_Syndicate_Shortcode_Base {
 			$site_url = trailingslashit( esc_url( $atts['host'] ) );
 		}
 
-		$site_url = parse_url( $site_url );
+		$site_url = wp_parse_url( $site_url );
 
 		if ( empty( $site_url['host'] ) ) {
 			return false;
@@ -211,27 +214,37 @@ class WSU_Syndicate_Shortcode_Base {
 	public function build_taxonomy_filters( $atts, $request_url ) {
 		if ( ! empty( $atts['university_category_slug'] ) ) {
 			$terms = $this->sanitized_terms( $atts['university_category_slug'] );
-			$request_url = add_query_arg( array( 'filter[wsuwp_university_category]' => $terms ), $request_url );
+			$request_url = add_query_arg( array(
+				'filter[wsuwp_university_category]' => $terms,
+			), $request_url );
 		}
 
 		if ( ! empty( $atts['university_organization_slug'] ) ) {
 			$terms = $this->sanitized_terms( $atts['university_organization_slug'] );
-			$request_url = add_query_arg( array( 'filter[wsuwp_university_org]' => $terms ), $request_url );
+			$request_url = add_query_arg( array(
+				'filter[wsuwp_university_org]' => $terms,
+			), $request_url );
 		}
 
 		if ( ! empty( $atts['university_location_slug'] ) ) {
 			$terms = $this->sanitized_terms( $atts['university_location_slug'] );
-			$request_url = add_query_arg( array( 'filter[wsuwp_university_location]' => $terms ), $request_url );
+			$request_url = add_query_arg( array(
+				'filter[wsuwp_university_location]' => $terms,
+			), $request_url );
 		}
 
 		if ( ! empty( $atts['site_category_slug'] ) ) {
 			$terms = $this->sanitized_terms( $atts['site_category_slug'] );
-			$request_url = add_query_arg( array( 'filter[category_name]' => $terms ), $request_url );
+			$request_url = add_query_arg( array(
+				'filter[category_name]' => $terms,
+			), $request_url );
 		}
 
 		if ( ! empty( $atts['tag'] ) ) {
 			$terms = $this->sanitized_terms( $atts['tag'] );
-			$request_url = add_query_arg( array( 'filter[tag]' => $terms ), $request_url );
+			$request_url = add_query_arg( array(
+				'filter[tag]' => $terms,
+			), $request_url );
 		}
 
 		return $request_url;

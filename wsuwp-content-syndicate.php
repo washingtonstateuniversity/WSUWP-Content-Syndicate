@@ -8,59 +8,41 @@ Author URI: https://web.wsu.edu/
 Version: 0.10.1
 */
 
-class WSU_Content_Syndicate {
-	/**
-	 * @var WSU_Content_Syndicate
-	 */
-	private static $instance;
+namespace WSU\ContentSyndicate;
 
-	/**
-	 * Maintain and return the one instance and initiate hooks when
-	 * called the first time.
-	 *
-	 * @return \WSU_Content_Syndicate
-	 */
-	public static function get_instance() {
-		if ( ! isset( self::$instance ) ) {
-			self::$instance = new WSU_Content_Syndicate;
-			self::$instance->setup_hooks();
-		}
-		return self::$instance;
-	}
-
-	/**
-	 * Setup hooks to include and then activate the plugin's shortcodes.
-	 */
-	public function setup_hooks() {
-		add_action( 'init', array( $this, 'activate_shortcodes' ) );
-	}
-
-	/**
-	 * Include individual and activate individual syndicate shortcodes.
-	 */
-	public function activate_shortcodes() {
-		require_once( dirname( __FILE__ ) . '/includes/syndicate-shortcode-base.php' );
-		require_once( dirname( __FILE__ ) . '/includes/syndicate-shortcode-json.php' );
-		require_once( dirname( __FILE__ ) . '/includes/syndicate-shortcode-people.php' );
-		require_once( dirname( __FILE__ ) . '/includes/syndicate-shortcode-events.php' );
-
-		// Add the [wsuwp_json] shortcode to pull standard post content.
-		new WSU_Syndicate_Shortcode_JSON();
-
-		// Add the [wsuwp_people] shortcode to pull profiles from people.wsu.edu.
-		new WSU_Syndicate_Shortcode_People();
-
-		// Add the [wsuwp_events] shortcode to pull calendar events.
-		new WSU_Syndicate_Shortcode_Events();
-	}
+// If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) ) {
+	die;
 }
 
-add_action( 'after_setup_theme', 'WSU_Content_Syndicate' );
+add_action( 'plugins_loaded', 'WSU\ContentSyndicate\bootstrap' );
 /**
- * Start things up.
+ * Loads the WSUWP Content Syndicate base.
  *
- * @return \WSU_Content_Syndicate
+ * @since 0.11.0
  */
-function WSU_Content_Syndicate() {
-	return WSU_Content_Syndicate::get_instance();
+function bootstrap() {
+	include_once __DIR__ . '/includes/class-wsu-syndicate-shortcode-base.php';
+
+	add_action( 'init', 'WSU\ContentSyndicate\activate_shortcodes' );
+}
+
+/**
+ * Activates the shortcodes built in with WSUWP Content Syndicate.
+ *
+ * @since 0.11.0
+ */
+function activate_shortcodes() {
+	include_once( dirname( __FILE__ ) . '/includes/class-wsu-syndicate-shortcode-json.php' );
+	include_once( dirname( __FILE__ ) . '/includes/class-wsu-syndicate-shortcode-people.php' );
+	include_once( dirname( __FILE__ ) . '/includes/class-wsu-syndicate-shortcode-events.php' );
+
+	// Add the [wsuwp_json] shortcode to pull standard post content.
+	new \WSU_Syndicate_Shortcode_JSON();
+
+	// Add the [wsuwp_people] shortcode to pull profiles from people.wsu.edu.
+	new \WSU_Syndicate_Shortcode_People();
+
+	// Add the [wsuwp_events] shortcode to pull calendar events.
+	new \WSU_Syndicate_Shortcode_Events();
 }
