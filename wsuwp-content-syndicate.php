@@ -39,10 +39,10 @@ class WSU_Content_Syndicate {
 	 * Include individual and activate individual syndicate shortcodes.
 	 */
 	public function activate_shortcodes() {
-		require_once( dirname( __FILE__ ) . '/includes/syndicate-shortcode-base.php' );
-		require_once( dirname( __FILE__ ) . '/includes/syndicate-shortcode-json.php' );
-		require_once( dirname( __FILE__ ) . '/includes/syndicate-shortcode-people.php' );
-		require_once( dirname( __FILE__ ) . '/includes/syndicate-shortcode-events.php' );
+		require_once( dirname( __FILE__ ) . '/includes/class-wsu-syndicate-shortcode-base.php' );
+		require_once( dirname( __FILE__ ) . '/includes/class-wsu-syndicate-shortcode-json.php' );
+		require_once( dirname( __FILE__ ) . '/includes/class-wsu-syndicate-shortcode-people.php' );
+		require_once( dirname( __FILE__ ) . '/includes/class-wsu-syndicate-shortcode-events.php' );
 
 		// Add the [wsuwp_json] shortcode to pull standard post content.
 		new WSU_Syndicate_Shortcode_JSON();
