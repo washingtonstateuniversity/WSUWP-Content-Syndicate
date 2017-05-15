@@ -34,15 +34,9 @@ function bootstrap() {
  */
 function activate_shortcodes() {
 	include_once( dirname( __FILE__ ) . '/includes/class-wsu-syndicate-shortcode-json.php' );
-	include_once( dirname( __FILE__ ) . '/includes/class-wsu-syndicate-shortcode-people.php' );
-	include_once( dirname( __FILE__ ) . '/includes/class-wsu-syndicate-shortcode-events.php' );
 
 	// Add the [wsuwp_json] shortcode to pull standard post content.
 	new \WSU_Syndicate_Shortcode_JSON();
 
-	// Add the [wsuwp_people] shortcode to pull profiles from people.wsu.edu.
-	new \WSU_Syndicate_Shortcode_People();
-
-	// Add the [wsuwp_events] shortcode to pull calendar events.
-	new \WSU_Syndicate_Shortcode_Events();
+	do_action( 'wsuwp_content_syndicate_shortcodes' );
 }
