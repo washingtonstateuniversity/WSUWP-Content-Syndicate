@@ -87,14 +87,9 @@ class WSU_Syndicate_Shortcode_Events extends WSU_Syndicate_Shortcode_Base {
 
 		$new_data = array();
 		if ( ! empty( $data ) ) {
-			$original_data = $data;
 			$data = json_decode( $data );
 
 			if ( null === $data ) {
-				$original_type = gettype( $original_data );
-				error_log( 'WSUWP Content Syndicate: Null JSON. Original type: ' . $original_type );
-				error_log( 'WSUWP Content Syndicate: Original URL: ' . esc_url( $request_url ) );
-				error_log( 'WSUWP Content Syndicate: Original Response Code: ' . wp_remote_retrieve_response_code( $response ) );
 				$data = array();
 			}
 
