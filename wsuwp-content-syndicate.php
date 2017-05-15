@@ -38,4 +38,5 @@ function activate_shortcodes() {
 	// Add the [wsuwp_json] shortcode to pull standard post content.
 	new \WSU_Syndicate_Shortcode_JSON();
 
+	do_action( 'wsuwp_content_syndicate_shortcodes' );
 }
