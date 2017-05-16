@@ -5,7 +5,7 @@ Plugin URI: https://web.wsu.edu/wordpress/plugins/wsuwp-content-syndicate/
 Description: Retrieve content for display from throughout Washington State University
 Author: washingtonstateuniversity, jeremyfelt
 Author URI: https://web.wsu.edu/
-Version: 0.10.1
+Version: 1.0.0
 */
 
 namespace WSU\ContentSyndicate;
@@ -19,7 +19,7 @@ add_action( 'plugins_loaded', 'WSU\ContentSyndicate\bootstrap' );
 /**
  * Loads the WSUWP Content Syndicate base.
  *
- * @since 0.11.0
+ * @since 1.0.0
  */
 function bootstrap() {
 	include_once __DIR__ . '/includes/class-wsu-syndicate-shortcode-base.php';
@@ -30,7 +30,7 @@ function bootstrap() {
 /**
  * Activates the shortcodes built in with WSUWP Content Syndicate.
  *
- * @since 0.11.0
+ * @since 1.0.0
  */
 function activate_shortcodes() {
 	include_once( dirname( __FILE__ ) . '/includes/class-wsu-syndicate-shortcode-json.php' );
