@@ -168,6 +168,31 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 			$new_data = array_slice( $new_data, 0, $atts['count'], false );
 		}
 
+		$content = apply_filters( 'wsuwp_content_syndicate_json_output', false, $new_data, $atts );
+
+		if ( false === $content ) {
+			$content = $this->generate_shortcode_output( $new_data, $atts );
+		}
+
+		// Store the built content in cache for repeated use.
+		$this->set_content_cache( $atts, 'wsuwp_json', $content );
+
+		$content = apply_filters( 'wsuwp_content_syndicate_json', $content, $atts );
+
+		return $content;
+	}
+
+	/**
+	 * Generates the content to display for a shortcode.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @param array $new_data Data containing the posts to be displayed.
+	 * @param array $atts     Array of options passed with the shortcode.
+	 *
+	 * @return string Content to display for the shortcode.
+	 */
+	private function generate_shortcode_output( $new_data, $atts ) {
 		ob_start();
 		// By default, we output a JSON object that can then be used by a script.
 		if ( 'json' === $atts['output'] ) {
@@ -250,11 +275,6 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 		} // End if().
 		$content = ob_get_contents();
 		ob_end_clean();
-
-		// Store the built content in cache for repeated use.
-		$this->set_content_cache( $atts, 'wsuwp_json', $content );
-
-		$content = apply_filters( 'wsuwp_content_syndicate_json', $content, $atts );
 
 		return $content;
 	}
