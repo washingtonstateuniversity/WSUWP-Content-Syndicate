@@ -309,14 +309,14 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 
 			// If a featured image is assigned (int), the full data will be in the `_embedded` property.
 			if ( ! empty( $post->featured_media ) && isset( $post->_embedded->{'wp:featuredmedia'} ) && 0 < count( $post->_embedded->{'wp:featuredmedia'} ) ) {
-				$subset_feature = $post->_embedded->{'wp:featuredmedia'}[0]->media_details;
+				$subset->featured_media = $post->_embedded->{'wp:featuredmedia'}[0];
 
-				if ( isset( $subset_feature->sizes->{'post-thumbnail'} ) ) {
-					$subset->thumbnail = $subset_feature->sizes->{'post-thumbnail'}->source_url;
-				} elseif ( isset( $subset_feature->sizes->{'thumbnail'} ) ) {
-					$subset->thumbnail = $subset_feature->sizes->{'thumbnail'}->source_url;
+				if ( isset( $subset->featured_media->media_details->sizes->{'post-thumbnail'} ) ) {
+					$subset->thumbnail = $subset->featured_media->media_details->sizes->{'post-thumbnail'}->source_url;
+				} elseif ( isset( $subset->featured_media->media_details->sizes->{'thumbnail'} ) ) {
+					$subset->thumbnail = $subset->featured_media->media_details->sizes->{'thumbnail'}->source_url;
 				} else {
-					$subset->thumbnail = $post->_embedded->{'wp:featuredmedia'}[0]->source_url;
+					$subset->thumbnail = $subset->featured_media->source_url;
 				}
 			} else {
 				$subset->thumbnail = false;
@@ -376,29 +376,35 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 		$new_data = array();
 
 		foreach ( $data as $post ) {
+			// Convert array to an object so that data can be handled as if it was remote.
+			$post = json_decode( wp_json_encode( $post ) );
+
 			$subset = new stdClass();
-			$subset->ID = $post['id'];
-			$subset->date = $post['date']; // In time zone of requested site
-			$subset->link = $post['link'];
+			$subset->ID = $post->id;
+			$subset->date = $post->date; // In time zone of requested site
+			$subset->link = $post->link;
 
 			// These fields all provide a rendered version when the response is generated.
-			$subset->title   = $post['title']['rendered'];
-			$subset->content = $post['content']['rendered'];
-			$subset->excerpt = $post['excerpt']['rendered'];
+			$subset->title   = $post->title->rendered;
+			$subset->content = $post->content->rendered;
+			$subset->excerpt = $post->excerpt->rendered;
 
-			if ( ! empty( $post['featured_media'] ) && ! empty( $post['_links']['wp:featuredmedia'] ) ) {
-				$media_request_url = $post['_links']['wp:featuredmedia'][0]['href'];
+			if ( ! empty( $post->featured_media ) && ! empty( $post->_links->{'wp:featuredmedia'} ) ) {
+				$media_request_url = $post->_links->{'wp:featuredmedia'}[0]->href;
 				$media_request = WP_REST_Request::from_url( $media_request_url );
 				$media_response = rest_do_request( $media_request );
-				$data = $media_response->data;
-				$data = $data['media_details']['sizes'];
 
-				if ( isset( $data['post-thumbnail'] ) ) {
-					$subset->thumbnail = $data['post-thumbnail']['source_url'];
-				} elseif ( isset( $data['thumbnail'] ) ) {
-					$subset->thumbnail = $data['thumbnail']['source_url'];
+				// Convert array to an object so that data can be handled as if it was remote.
+				$data = json_decode( wp_json_encode( $media_response->data ) );
+
+				$subset->featured_media = $data;
+
+				if ( isset( $data->media_details->sizes->{'post-thumbnail'} ) ) {
+					$subset->thumbnail = $data->media_details->sizes->{'post-thumbnail'}->source_url;
+				} elseif ( isset( $data->media_details->sizes->thumbnail ) ) {
+					$subset->thumbnail = $data->media_details->sizes->thumbnail->source_url;
 				} else {
-					$subset->thumbnail = $media_response->data['source_url'];
+					$subset->thumbnail = $data->source_url;
 				}
 			} else {
 				$subset->thumbnail = false;
@@ -406,8 +412,8 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 
 			$subset->author_name = '';
 
-			if ( ! empty( $post['author'] ) && ! empty( $post['_links']['author'] ) ) {
-				$author_request_url = $post['_links']['author'][0]['href'];
+			if ( ! empty( $post->author ) && ! empty( $post->_links->author ) ) {
+				$author_request_url = $post->_links->author[0]->href;
 				$author_request = WP_REST_Request::from_url( $author_request_url );
 				$author_response = rest_do_request( $author_request );
 				if ( isset( $author_response->data['name'] ) ) {
@@ -429,8 +435,8 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 			 */
 			$subset = apply_filters( 'wsu_content_syndicate_host_data', $subset, $post, $atts );
 
-			if ( $post['date'] ) {
-				$subset_key = strtotime( $post['date'] );
+			if ( $post->date ) {
+				$subset_key = strtotime( $post->date );
 			} else {
 				$subset_key = time();
 			}
