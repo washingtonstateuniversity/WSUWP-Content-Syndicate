@@ -1,11 +1,11 @@
 <?php
 /*
 Plugin Name: WSUWP Content Syndicate
-Plugin URI: https://web.wsu.edu/wordpress/plugins/wsuwp-content-syndicate/
-Description: Retrieve content for display from throughout Washington State University
+Plugin URI: https://github.com/washingtonstateuniversity/WSUWP-Content-Syndicate
+Description: Retrieve content for display from other WordPress sites.
 Author: washingtonstateuniversity, jeremyfelt
 Author URI: https://web.wsu.edu/
-Version: 1.0.0
+Version: 1.1.0
 */
 
 namespace WSU\ContentSyndicate;
