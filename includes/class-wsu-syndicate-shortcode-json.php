@@ -309,14 +309,14 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 
 			// If a featured image is assigned (int), the full data will be in the `_embedded` property.
 			if ( ! empty( $post->featured_media ) && isset( $post->_embedded->{'wp:featuredmedia'} ) && 0 < count( $post->_embedded->{'wp:featuredmedia'} ) ) {
-				$subset_feature = $post->_embedded->{'wp:featuredmedia'}[0]->media_details;
+				$subset->featured_media = $post->_embedded->{'wp:featuredmedia'}[0];
 
-				if ( isset( $subset_feature->sizes->{'post-thumbnail'} ) ) {
-					$subset->thumbnail = $subset_feature->sizes->{'post-thumbnail'}->source_url;
-				} elseif ( isset( $subset_feature->sizes->{'thumbnail'} ) ) {
-					$subset->thumbnail = $subset_feature->sizes->{'thumbnail'}->source_url;
+				if ( isset( $subset->featured_media->media_details->sizes->{'post-thumbnail'} ) ) {
+					$subset->thumbnail = $subset->featured_media->media_details->sizes->{'post-thumbnail'}->source_url;
+				} elseif ( isset( $subset->featured_media->media_details->sizes->{'thumbnail'} ) ) {
+					$subset->thumbnail = $subset->featured_media->media_details->sizes->{'thumbnail'}->source_url;
 				} else {
-					$subset->thumbnail = $post->_embedded->{'wp:featuredmedia'}[0]->source_url;
+					$subset->thumbnail = $subset->featured_media->source_url;
 				}
 			} else {
 				$subset->thumbnail = false;
