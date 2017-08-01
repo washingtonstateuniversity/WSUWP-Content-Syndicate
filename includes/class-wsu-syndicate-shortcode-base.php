@@ -105,9 +105,9 @@ class WSU_Syndicate_Shortcode_Base {
 	 * @return bool|string False if cache is not available or expired. Content if available.
 	 */
 	public function get_content_cache( $atts, $shortcode ) {
-		$atts_key = md5( serialize( $atts ) ); // @codingStandardsIgnoreLine
+		$atts_key = md5( serialize( $atts ) . $shortcode ); // @codingStandardsIgnoreLine
 
-		$content = wp_cache_get( $atts_key, $shortcode );
+		$content = get_transient( $atts_key );
 
 		return $content;
 	}
@@ -120,9 +120,9 @@ class WSU_Syndicate_Shortcode_Base {
 	 * @param string $content   Generated content after processing the shortcode.
 	 */
 	public function set_content_cache( $atts, $shortcode, $content ) {
-		$atts_key = md5( serialize( $atts ) ); // @codingStandardsIgnoreLine
+		$atts_key = md5( serialize( $atts ) . $shortcode ); // @codingStandardsIgnoreLine
 
-		wp_cache_set( $atts_key, $content, $shortcode, 600 );
+		set_transient( $atts_key, $content, 600 );
 	}
 
 	/**
