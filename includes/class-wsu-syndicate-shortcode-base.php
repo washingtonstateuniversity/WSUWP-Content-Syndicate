@@ -209,7 +209,7 @@ class WSU_Syndicate_Shortcode_Base {
 	 * @return string Modified REST API URL.
 	 */
 	public function build_taxonomy_filters( $atts, $request_url ) {
-		$request_url = apply_filters( 'wsuwp_content_syndicate_json_taxonomy_filters', $request_url, $atts, $request_url );
+		$request_url = apply_filters( 'wsuwp_content_syndicate_taxonomy_filters', $request_url, $atts, $request_url );
 
 		return $request_url;
 	}
