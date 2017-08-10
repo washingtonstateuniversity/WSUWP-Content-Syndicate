@@ -200,7 +200,7 @@ class WSU_Syndicate_Shortcode_Base {
 	}
 
 	/**
-	 * Add proper filters to a given URL to handle lookup by customn taxonomies and
+	 * Add proper filters to a given URL to handle lookup by custom taxonomies and
 	 * built in WordPress taxonomies.
 	 *
 	 * @param array  $atts        List of attributes used for the shortcode.
