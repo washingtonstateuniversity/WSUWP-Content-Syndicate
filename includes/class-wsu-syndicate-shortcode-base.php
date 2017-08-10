@@ -24,11 +24,6 @@ class WSU_Syndicate_Shortcode_Base {
 		'host' => 'news.wsu.edu',
 		'scheme' => 'http',
 		'site' => '',
-		'university_category_slug' => '',
-		'university_organization_slug' => '',
-		'university_location_slug' => '',
-		'site_category_slug' => '',
-		'tag' => '',
 		'query' => 'posts',
 		'local_count' => 0,
 		'count' => false,
@@ -89,6 +84,8 @@ class WSU_Syndicate_Shortcode_Base {
 	 * @return array Fully populated list of attributes expected by the shortcode.
 	 */
 	public function process_attributes( $atts ) {
+		$this->defaults_atts = apply_filters( 'wsuwp_content_syndicate_default_atts', $this->defaults_atts );
+
 		$defaults = shortcode_atts( $this->defaults_atts, $this->local_default_atts );
 		$defaults = $defaults + $this->local_extended_atts;
 
