@@ -24,11 +24,6 @@ class WSU_Syndicate_Shortcode_Base {
 		'host' => 'news.wsu.edu',
 		'scheme' => 'http',
 		'site' => '',
-		'university_category_slug' => '',
-		'university_organization_slug' => '',
-		'university_location_slug' => '',
-		'site_category_slug' => '',
-		'tag' => '',
 		'query' => 'posts',
 		'local_count' => 0,
 		'count' => false,
@@ -89,6 +84,8 @@ class WSU_Syndicate_Shortcode_Base {
 	 * @return array Fully populated list of attributes expected by the shortcode.
 	 */
 	public function process_attributes( $atts ) {
+		$this->defaults_atts = apply_filters( 'wsuwp_content_syndicate_default_atts', $this->defaults_atts );
+
 		$defaults = shortcode_atts( $this->defaults_atts, $this->local_default_atts );
 		$defaults = $defaults + $this->local_extended_atts;
 
@@ -203,7 +200,7 @@ class WSU_Syndicate_Shortcode_Base {
 	}
 
 	/**
-	 * Add proper filters to a given URL to handle lookup by University taxonomies and
+	 * Add proper filters to a given URL to handle lookup by custom taxonomies and
 	 * built in WordPress taxonomies.
 	 *
 	 * @param array  $atts        List of attributes used for the shortcode.
@@ -212,40 +209,7 @@ class WSU_Syndicate_Shortcode_Base {
 	 * @return string Modified REST API URL.
 	 */
 	public function build_taxonomy_filters( $atts, $request_url ) {
-		if ( ! empty( $atts['university_category_slug'] ) ) {
-			$terms = $this->sanitized_terms( $atts['university_category_slug'] );
-			$request_url = add_query_arg( array(
-				'filter[wsuwp_university_category]' => $terms,
-			), $request_url );
-		}
-
-		if ( ! empty( $atts['university_organization_slug'] ) ) {
-			$terms = $this->sanitized_terms( $atts['university_organization_slug'] );
-			$request_url = add_query_arg( array(
-				'filter[wsuwp_university_org]' => $terms,
-			), $request_url );
-		}
-
-		if ( ! empty( $atts['university_location_slug'] ) ) {
-			$terms = $this->sanitized_terms( $atts['university_location_slug'] );
-			$request_url = add_query_arg( array(
-				'filter[wsuwp_university_location]' => $terms,
-			), $request_url );
-		}
-
-		if ( ! empty( $atts['site_category_slug'] ) ) {
-			$terms = $this->sanitized_terms( $atts['site_category_slug'] );
-			$request_url = add_query_arg( array(
-				'filter[category_name]' => $terms,
-			), $request_url );
-		}
-
-		if ( ! empty( $atts['tag'] ) ) {
-			$terms = $this->sanitized_terms( $atts['tag'] );
-			$request_url = add_query_arg( array(
-				'filter[tag]' => $terms,
-			), $request_url );
-		}
+		$request_url = apply_filters( 'wsuwp_content_syndicate_taxonomy_filters', $request_url, $atts, $request_url );
 
 		return $request_url;
 	}
