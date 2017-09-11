@@ -105,58 +105,38 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 		}
 
 		if ( 0 !== absint( $atts['local_count'] ) ) {
-			$news_query_args = array(
-				'post_type' => 'post',
-				'posts_per_page' => absint( $atts['local_count'] ),
-			);
-			$news_query = new WP_Query( $news_query_args );
-
-			while ( $news_query->have_posts() ) {
-				$news_query->the_post();
-				$subset = new stdClass();
-				$subset->ID = get_the_ID();
-				$subset->date = get_the_date();
-				$subset->title = get_the_title();
-				$subset->link = get_the_permalink();
-				$subset->excerpt = get_the_excerpt();
-
-				$subset->thumbnail = false;
-				// Retrieve the source URL for any featured image assigned to the post.
-				$post_thumbnail_id = get_post_thumbnail_id( get_the_ID() );
-				if ( 0 < absint( $post_thumbnail_id ) ) {
-					$post_thumbnail_src = wp_get_attachment_image_src( $post_thumbnail_id, 'post-thumbnail' );
-					if ( $post_thumbnail_src ) {
-						$subset->thumbnail = $post_thumbnail_src[0];
-					}
+			$local_atts = array();
+			foreach ( $atts as $attribute => $value ) {
+				if ( 0 === stripos( $attribute, 'local_' ) ) {
+					$local_atts[ substr( $attribute, 6 ) ] = $value;
+				} else {
+					$local_atts[ $attribute ] = $value;
 				}
+			}
 
-				// Split the content to display an excerpt marked by a more tag.
-				$subset_content = get_the_content();
-				$subset_content = explode( '<span id="more', $subset_content );
-				$subset_content = wpautop( $subset_content[0] );
+			$local_atts['host'] = get_site()->domain . get_site()->path;
+			$local_atts['count'] = $atts['local_count'];
 
-				$subset->content = apply_filters( 'the_content', $subset_content );
-				$subset->terms = array();
-				$subset->author_name = get_the_author();
-				$subset->author_avatar = '';
+			$local_url = $this->get_request_url( $local_atts );
 
-				/**
-				 * Filter the data stored for an individual local result after defaults have been built.
-				 *
-				 * @since 0.7.10
-				 *
-				 * @param object $subset Data attached to this result. Corresponds to a local post.
-				 * @param array  $atts   Attributes originally passed to the `wsuwp_json` shortcode.
-				 */
-				$subset = apply_filters( 'wsu_content_syndicate_local_data', $subset, $atts );
+			$request = $this->build_initial_request( $local_url, $local_atts );
+			$request_url = $this->build_taxonomy_filters( $local_atts, $request['url'] );
 
-				$subset_key = get_the_date( 'U' );
-				while ( array_key_exists( $subset_key, $new_data ) ) {
-					$subset_key++;
-				}
-				$new_data[ $subset_key ] = $subset;
-			} // End while().
-			wp_reset_postdata();
+			$local_count = ( 100 < absint( $local_atts['count'] ) ) ? 100 : $local_atts['count'];
+			$request_url = add_query_arg( array(
+				'per_page' => absint( $local_count ),
+				'_embed' => '',
+			), $request_url );
+
+			$request = WP_REST_Request::from_url( $request_url );
+			$response = rest_do_request( $request );
+
+			$local_data = array();
+			if ( 200 === $response->get_status() ) {
+				$local_data = $this->process_local_posts( $response->data, $atts );
+			}
+
+			$new_data = $new_data + $local_data;
 		} // End if().
 
 		// Reverse sort the array of data by date.
