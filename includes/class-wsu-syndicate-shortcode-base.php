@@ -84,10 +84,26 @@ class WSU_Syndicate_Shortcode_Base {
 	 * @return array Fully populated list of attributes expected by the shortcode.
 	 */
 	public function process_attributes( $atts ) {
-		$this->defaults_atts = apply_filters( 'wsuwp_content_syndicate_default_atts', $this->defaults_atts );
+		$defaults = apply_filters( 'wsuwp_content_syndicate_default_atts', $this->defaults_atts );
 
-		$defaults = shortcode_atts( $this->defaults_atts, $this->local_default_atts );
-		$defaults = $defaults + $this->local_extended_atts;
+		$defaults = shortcode_atts( $defaults, $this->local_default_atts );
+		$defaults = array_merge( $defaults, $this->local_extended_atts );
+
+		$local_defaults = array();
+
+		// Allow for different attribute values to be passed when results from the
+		// local site are merged into results from a remote site.
+		foreach ( $defaults as $attribute => $value ) {
+
+			// The core default attributes should stay the same
+			if ( array_key_exists( $attribute, $this->defaults_atts ) ) {
+				continue;
+			}
+
+			$local_defaults[ 'local_' . $attribute ] = $value;
+		}
+
+		$defaults = array_merge( $defaults, $local_defaults );
 
 		return shortcode_atts( $defaults, $atts, $this->shortcode_name );
 	}
