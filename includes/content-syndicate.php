@@ -34,7 +34,7 @@ function activate_shortcodes() {
  * Clear the last changed cache for local results whenever
  * a post is saved.
  *
- * @since 1.3.0
+ * @since 1.4.0
  */
 function clear_local_content_cache() {
 	wp_cache_set( 'last_changed', microtime(), 'wsuwp-content' );
