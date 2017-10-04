@@ -57,12 +57,6 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 			return '<!-- wsuwp_json ERROR - an empty host was supplied -->';
 		}
 
-		// Retrieve existing content from cache if available.
-		$content = $this->get_content_cache( $atts, 'wsuwp_json' );
-		if ( $content ) {
-			return apply_filters( 'wsuwp_content_syndicate_json', $content, $atts );
-		}
-
 		$request = $this->build_initial_request( $site_url, $atts );
 		$request_url = $this->build_taxonomy_filters( $atts, $request['url'] );
 
@@ -81,27 +75,44 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 			'_embed' => '',
 		), $request_url );
 
-		$new_data = array();
-
 		if ( 'local' === $request['scheme'] ) {
-			$request = WP_REST_Request::from_url( $request_url );
-			$response = rest_do_request( $request );
-			if ( 200 === $response->get_status() ) {
-				$new_data = $this->process_local_posts( $response->data, $atts );
-			}
-		} else {
-			$response = wp_remote_get( $request_url );
+			$last_changed = wp_cache_get_last_changed( 'wsuwp-content' );
+			$cache_key = md5( $request_url ) . ':' . $last_changed;
+			$new_data = wp_cache_get( $cache_key, 'wsuwp-content' );
 
-			if ( ! is_wp_error( $response ) && 404 !== wp_remote_retrieve_response_code( $response ) ) {
-				$data = wp_remote_retrieve_body( $response );
-				$data = json_decode( $data );
-
-				if ( null === $data ) {
-					$data = array();
+			if ( ! is_array( $new_data ) ) {
+				$request = WP_REST_Request::from_url( $request_url );
+				$response = rest_do_request( $request );
+				if ( 200 === $response->get_status() ) {
+					$new_data = $this->process_local_posts( $response->data, $atts );
 				}
 
-				$new_data = $this->process_remote_posts( $data, $atts );
+				wp_cache_set( $cache_key, $new_data, 'wsuwp-content' );
 			}
+		} else {
+			$new_data = $this->get_content_cache( $atts, 'wsuwp-remote' );
+
+			if ( ! is_array( $new_data ) ) {
+				$response = wp_remote_get( $request_url );
+
+				if ( ! is_wp_error( $response ) && 404 !== wp_remote_retrieve_response_code( $response ) ) {
+					$data = wp_remote_retrieve_body( $response );
+					$data = json_decode( $data );
+
+					if ( null === $data ) {
+						$data = array();
+					}
+
+					$new_data = $this->process_remote_posts( $data, $atts );
+
+					// Store the built content in cache for repeated use.
+					$this->set_content_cache( $atts, 'wsuwp_json', $new_data );
+				}
+			}
+		}
+
+		if ( ! is_array( $new_data ) ) {
+			$new_data = array();
 		}
 
 		if ( 0 !== absint( $atts['local_count'] ) ) {
@@ -128,15 +139,25 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 				'_embed' => '',
 			), $request_url );
 
-			$request = WP_REST_Request::from_url( $request_url );
-			$response = rest_do_request( $request );
+			$last_changed = wp_cache_get_last_changed( 'wsuwp-content' );
+			$cache_key = md5( $request_url ) . ':' . $last_changed;
+			$local_data = wp_cache_get( $cache_key, 'wsuwp-content' );
 
-			$local_data = array();
-			if ( 200 === $response->get_status() ) {
-				$local_data = $this->process_local_posts( $response->data, $atts );
+			if ( ! is_array( $local_data ) ) {
+				$request = WP_REST_Request::from_url( $request_url );
+				$response = rest_do_request( $request );
+
+				$local_data = array();
+				if ( 200 === $response->get_status() ) {
+					$local_data = $this->process_local_posts( $response->data, $atts );
+				}
+
+				wp_cache_set( $cache_key, $local_data, 'wsuwp-content' );
 			}
 
-			$new_data = $new_data + $local_data;
+			if ( is_array( $local_data ) ) {
+				$new_data = $new_data + $local_data;
+			}
 		} // End if().
 
 		// Reverse sort the array of data by date.
@@ -153,9 +174,6 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 		if ( false === $content ) {
 			$content = $this->generate_shortcode_output( $new_data, $atts );
 		}
-
-		// Store the built content in cache for repeated use.
-		$this->set_content_cache( $atts, 'wsuwp_json', $content );
 
 		$content = apply_filters( 'wsuwp_content_syndicate_json', $content, $atts );
 
