@@ -23,6 +23,7 @@ add_action( 'plugins_loaded', 'WSU\ContentSyndicate\bootstrap' );
  */
 function bootstrap() {
 	include_once __DIR__ . '/includes/class-wsu-syndicate-shortcode-base.php';
+	include_once __DIR__ . '/includes/content-syndicate.php';
 
 	add_action( 'init', 'WSU\ContentSyndicate\activate_shortcodes' );
 }
