@@ -14,6 +14,7 @@ function bootstrap() {
 
 	add_action( 'init', 'WSU\Content_Syndicate\activate_shortcodes' );
 	add_action( 'save_post_post', 'WSU\Content_Syndicate\clear_local_content_cache' );
+	add_action( 'save_post_page', 'WSU\Content_Syndicate\clear_local_content_cache' );
 }
 
 /**
