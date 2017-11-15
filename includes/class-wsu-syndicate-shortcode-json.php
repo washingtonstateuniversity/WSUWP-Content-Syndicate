@@ -87,7 +87,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 				wp_cache_set( $cache_key, $new_data, 'wsuwp-content' );
 			}
 		} else {
-			$new_data = $this->get_content_cache( $atts, 'wsuwp-remote' );
+			$new_data = $this->get_content_cache( $atts, 'wsuwp_json' );
 
 			if ( ! is_array( $new_data ) ) {
 				$response = wp_remote_get( $request_url );
