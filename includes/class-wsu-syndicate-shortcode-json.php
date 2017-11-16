@@ -307,7 +307,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 			// Only a subset of data is returned for a headlines request.
 			if ( 'headlines' === $atts['output'] ) {
 				$subset->link = $post->link;
-				$subset->title   = $post->title->rendered;
+				$subset->title = $post->title->rendered;
 			} else {
 				$subset->ID = $post->id;
 				$subset->date = $post->date; // In time zone of requested site
@@ -396,7 +396,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 			// Only a subset of data is returned for a headlines request.
 			if ( 'headlines' === $atts['output'] ) {
 				$subset->link = $post->link;
-				$subset->title   = $post->title->rendered;
+				$subset->title = $post->title->rendered;
 			} else {
 				$subset->ID = $post->id;
 				$subset->date = $post->date; // In time zone of requested site
