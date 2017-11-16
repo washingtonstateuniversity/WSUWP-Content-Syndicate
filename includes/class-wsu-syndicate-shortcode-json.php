@@ -57,6 +57,16 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 		$request = $this->build_initial_request( $site_url, $atts );
 		$request_url = $this->build_taxonomy_filters( $atts, $request['url'] );
 
+		if ( 'headlines' === $atts['output'] ) {
+			$request_url = add_query_arg( array(
+				'_fields[]' => 'title',
+			), $request_url );
+
+			$request_url = add_query_arg( array(
+				'_fields[]' => 'link',
+			), $request_url );
+		}
+
 		if ( ! empty( $atts['offset'] ) ) {
 			$atts['count'] = absint( $atts['count'] ) + absint( $atts['offset'] );
 		}
@@ -293,39 +303,46 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 
 		foreach ( $data as $post ) {
 			$subset = new StdClass();
-			$subset->ID = $post->id;
-			$subset->date = $post->date; // In time zone of requested site
-			$subset->link = $post->link;
 
-			// These fields all provide a rendered version when the response is generated.
-			$subset->title   = $post->title->rendered;
-			$subset->content = $post->content->rendered;
-			$subset->excerpt = $post->excerpt->rendered;
+			// Only a subset of data is returned for a headlines request.
+			if ( 'headlines' === $atts['output'] ) {
+				$subset->link = $post->link;
+				$subset->title   = $post->title->rendered;
+			} else {
+				$subset->ID = $post->id;
+				$subset->date = $post->date; // In time zone of requested site
+				$subset->link = $post->link;
 
-			// If a featured image is assigned (int), the full data will be in the `_embedded` property.
-			if ( ! empty( $post->featured_media ) && isset( $post->_embedded->{'wp:featuredmedia'} ) && 0 < count( $post->_embedded->{'wp:featuredmedia'} ) ) {
-				$subset->featured_media = $post->_embedded->{'wp:featuredmedia'}[0];
+				// These fields all provide a rendered version when the response is generated.
+				$subset->title   = $post->title->rendered;
+				$subset->content = $post->content->rendered;
+				$subset->excerpt = $post->excerpt->rendered;
 
-				if ( isset( $subset->featured_media->media_details->sizes->{'post-thumbnail'} ) ) {
-					$subset->thumbnail = $subset->featured_media->media_details->sizes->{'post-thumbnail'}->source_url;
-				} elseif ( isset( $subset->featured_media->media_details->sizes->{'thumbnail'} ) ) {
-					$subset->thumbnail = $subset->featured_media->media_details->sizes->{'thumbnail'}->source_url;
+				// If a featured image is assigned (int), the full data will be in the `_embedded` property.
+				if ( ! empty( $post->featured_media ) && isset( $post->_embedded->{'wp:featuredmedia'} ) && 0 < count( $post->_embedded->{'wp:featuredmedia'} ) ) {
+					$subset->featured_media = $post->_embedded->{'wp:featuredmedia'}[0];
+
+					if ( isset( $subset->featured_media->media_details->sizes->{'post-thumbnail'} ) ) {
+						$subset->thumbnail = $subset->featured_media->media_details->sizes->{'post-thumbnail'}->source_url;
+					} elseif ( isset( $subset->featured_media->media_details->sizes->{'thumbnail'} ) ) {
+						$subset->thumbnail = $subset->featured_media->media_details->sizes->{'thumbnail'}->source_url;
+					} else {
+						$subset->thumbnail = $subset->featured_media->source_url;
+					}
 				} else {
-					$subset->thumbnail = $subset->featured_media->source_url;
+					$subset->thumbnail = false;
 				}
-			} else {
-				$subset->thumbnail = false;
-			}
 
-			// If an author is available, it will be in the `_embedded` property.
-			if ( isset( $post->_embedded ) && isset( $post->_embedded->author ) && 0 < count( $post->_embedded->author ) ) {
-				$subset->author_name = $post->_embedded->author[0]->name;
-			} else {
-				$subset->author_name = '';
-			}
+				// If an author is available, it will be in the `_embedded` property.
+				if ( isset( $post->_embedded ) && isset( $post->_embedded->author ) && 0 < count( $post->_embedded->author ) ) {
+					$subset->author_name = $post->_embedded->author[0]->name;
+				} else {
+					$subset->author_name = '';
+				}
 
-			// We've always provided an empty value for terms. @todo Implement terms. :)
-			$subset->terms = array();
+				// We've always provided an empty value for terms. @todo Implement terms. :)
+				$subset->terms = array();
+			} // End if().
 
 			/**
 			 * Filter the data stored for an individual result after defaults have been built.
@@ -338,7 +355,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 			 */
 			$subset = apply_filters( 'wsu_content_syndicate_host_data', $subset, $post, $atts );
 
-			if ( $post->date ) {
+			if ( isset( $post->date ) && $post->date ) {
 				$subset_key = strtotime( $post->date );
 			} else {
 				$subset_key = time();
@@ -375,49 +392,56 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 			$post = json_decode( wp_json_encode( $post ) );
 
 			$subset = new stdClass();
-			$subset->ID = $post->id;
-			$subset->date = $post->date; // In time zone of requested site
-			$subset->link = $post->link;
 
-			// These fields all provide a rendered version when the response is generated.
-			$subset->title   = $post->title->rendered;
-			$subset->content = $post->content->rendered;
-			$subset->excerpt = $post->excerpt->rendered;
-
-			if ( ! empty( $post->featured_media ) && ! empty( $post->_links->{'wp:featuredmedia'} ) ) {
-				$media_request_url = $post->_links->{'wp:featuredmedia'}[0]->href;
-				$media_request = WP_REST_Request::from_url( $media_request_url );
-				$media_response = rest_do_request( $media_request );
-
-				// Convert array to an object so that data can be handled as if it was remote.
-				$data = json_decode( wp_json_encode( $media_response->data ) );
-
-				$subset->featured_media = $data;
-
-				if ( isset( $data->media_details->sizes->{'post-thumbnail'} ) ) {
-					$subset->thumbnail = $data->media_details->sizes->{'post-thumbnail'}->source_url;
-				} elseif ( isset( $data->media_details->sizes->thumbnail ) ) {
-					$subset->thumbnail = $data->media_details->sizes->thumbnail->source_url;
-				} else {
-					$subset->thumbnail = $data->source_url;
-				}
+			// Only a subset of data is returned for a headlines request.
+			if ( 'headlines' === $atts['output'] ) {
+				$subset->link = $post->link;
+				$subset->title   = $post->title->rendered;
 			} else {
-				$subset->thumbnail = false;
-			}
+				$subset->ID = $post->id;
+				$subset->date = $post->date; // In time zone of requested site
+				$subset->link = $post->link;
 
-			$subset->author_name = '';
+				// These fields all provide a rendered version when the response is generated.
+				$subset->title   = $post->title->rendered;
+				$subset->content = $post->content->rendered;
+				$subset->excerpt = $post->excerpt->rendered;
 
-			if ( ! empty( $post->author ) && ! empty( $post->_links->author ) ) {
-				$author_request_url = $post->_links->author[0]->href;
-				$author_request = WP_REST_Request::from_url( $author_request_url );
-				$author_response = rest_do_request( $author_request );
-				if ( isset( $author_response->data['name'] ) ) {
-					$subset->author_name = $author_response->data['name'];
+				if ( ! empty( $post->featured_media ) && ! empty( $post->_links->{'wp:featuredmedia'} ) ) {
+					$media_request_url = $post->_links->{'wp:featuredmedia'}[0]->href;
+					$media_request = WP_REST_Request::from_url( $media_request_url );
+					$media_response = rest_do_request( $media_request );
+
+					// Convert array to an object so that data can be handled as if it was remote.
+					$data = json_decode( wp_json_encode( $media_response->data ) );
+
+					$subset->featured_media = $data;
+
+					if ( isset( $data->media_details->sizes->{'post-thumbnail'} ) ) {
+						$subset->thumbnail = $data->media_details->sizes->{'post-thumbnail'}->source_url;
+					} elseif ( isset( $data->media_details->sizes->thumbnail ) ) {
+						$subset->thumbnail = $data->media_details->sizes->thumbnail->source_url;
+					} else {
+						$subset->thumbnail = $data->source_url;
+					}
+				} else {
+					$subset->thumbnail = false;
 				}
-			}
 
-			// We've always provided an empty value for terms. @todo Implement terms. :)
-			$subset->terms = array();
+				$subset->author_name = '';
+
+				if ( ! empty( $post->author ) && ! empty( $post->_links->author ) ) {
+					$author_request_url = $post->_links->author[0]->href;
+					$author_request = WP_REST_Request::from_url( $author_request_url );
+					$author_response = rest_do_request( $author_request );
+					if ( isset( $author_response->data['name'] ) ) {
+						$subset->author_name = $author_response->data['name'];
+					}
+				}
+
+				// We've always provided an empty value for terms. @todo Implement terms. :)
+				$subset->terms = array();
+			} // End if().
 
 			/**
 			 * Filter the data stored for an individual result after defaults have been built.
@@ -430,7 +454,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 			 */
 			$subset = apply_filters( 'wsu_content_syndicate_host_data', $subset, $post, $atts );
 
-			if ( $post->date ) {
+			if ( isset( $post->date ) && $post->date ) {
 				$subset_key = strtotime( $post->date );
 			} else {
 				$subset_key = time();
