@@ -5,7 +5,7 @@ Plugin URI: https://github.com/washingtonstateuniversity/WSUWP-Content-Syndicate
 Description: Retrieve content for display from other WordPress sites.
 Author: washingtonstateuniversity, jeremyfelt, philcable
 Author URI: https://web.wsu.edu/
-Version: 1.4.2
+Version: 1.4.3
 */
 
 // If this file is called directly, abort.
