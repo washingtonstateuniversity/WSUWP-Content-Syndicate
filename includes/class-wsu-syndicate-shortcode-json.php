@@ -63,6 +63,10 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 			), $request_url );
 
 			$request_url = add_query_arg( array(
+				'_fields[]' => 'date',
+			), $request_url );
+
+			$request_url = add_query_arg( array(
 				'_fields[]' => 'link',
 			), $request_url );
 		}
@@ -307,6 +311,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 			// Only a subset of data is returned for a headlines request.
 			if ( 'headlines' === $atts['output'] ) {
 				$subset->link = $post->link;
+				$subset->date = $post->date;
 				$subset->title = $post->title->rendered;
 			} else {
 				$subset->ID = $post->id;
@@ -396,6 +401,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 			// Only a subset of data is returned for a headlines request.
 			if ( 'headlines' === $atts['output'] ) {
 				$subset->link = $post->link;
+				$subset->date = $post->date;
 				$subset->title = $post->title->rendered;
 			} else {
 				$subset->ID = $post->id;
