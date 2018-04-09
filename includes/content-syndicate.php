@@ -23,7 +23,7 @@ function bootstrap() {
  * @since 1.0.0
  */
 function activate_shortcodes() {
-	include_once( dirname( __FILE__ ) . '/class-wsu-syndicate-shortcode-json.php' );
+	include_once dirname( __FILE__ ) . '/class-wsu-syndicate-shortcode-json.php';
 
 	// Add the [wsuwp_json] shortcode to pull standard post content.
 	new \WSU_Syndicate_Shortcode_JSON();
