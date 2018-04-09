@@ -15,7 +15,8 @@ if ( ! defined( 'WPINC' ) ) {
 
 // This plugin uses namespaces and requires PHP 5.3 or greater.
 if ( version_compare( PHP_VERSION, '5.3', '<' ) ) {
-	add_action( 'admin_notices', create_function( '',
+
+	add_action( 'admin_notices', create_function( '', // phpcs:ignore WordPress.PHP.RestrictedPHPFunctions.create_function_create_function
 	"echo '<div class=\"error\"><p>" . __( 'WSUWP Content Syndicate requires PHP 5.3 to function properly. Please upgrade PHP or deactivate the plugin.', 'wsuwp-content-syndicate' ) . "</p></div>';" ) );
 	return;
 } else {
