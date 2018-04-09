@@ -234,9 +234,16 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 							$offset_x++;
 							continue;
 						}
+
+						if ( $content->thumbnail && isset( $content->featured_media->alt_text ) && ! empty( $content->featured_media->alt_text ) ) {
+							$alt_text = $content->featured_media->alt_text;
+						} else {
+							$alt_text = '';
+						}
+
 						?>
 						<li class="wsuwp-content-syndicate-item">
-							<span class="content-item-thumbnail"><?php if ( $content->thumbnail ) : ?><img src="<?php echo esc_url( $content->thumbnail ); ?>"><?php endif; ?></span>
+							<span class="content-item-thumbnail"><?php if ( $content->thumbnail ) : ?><img src="<?php echo esc_url( $content->thumbnail ); ?>" alt="<?php echo esc_attr( $alt_text ); ?>"><?php endif; ?></span>
 							<span class="content-item-title"><a href="<?php echo esc_url( $content->link ); ?>"><?php echo esc_html( $content->title ); ?></a></span>
 							<span class="content-item-byline">
 								<span class="content-item-byline-date"><?php echo esc_html( date( $atts['date_format'], strtotime( $content->date ) ) ); ?></span>
@@ -261,10 +268,16 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 							$offset_x++;
 							continue;
 						}
+
+						if ( $content->thumbnail && isset( $content->featured_media->alt_text ) && ! empty( $content->featured_media->alt_text ) ) {
+							$alt_text = $content->featured_media->alt_text;
+						} else {
+							$alt_text = '';
+						}
 						?>
 						<div class="wsuwp-content-syndicate-full">
 							<span class="content-item-thumbnail">
-								<?php if ( $content->thumbnail ) : ?><img src="<?php echo esc_url( $content->thumbnail ); ?>"><?php endif; ?>
+								<?php if ( $content->thumbnail ) : ?><img src="<?php echo esc_url( $content->thumbnail ); ?>" alt="<?php echo esc_attr( $alt_text ); ?>"><?php endif; ?>
 							</span>
 							<span class="content-item-title"><a href="<?php echo esc_url( $content->link ); ?>"><?php echo esc_html( $content->title ); ?></a></span>
 							<span class="content-item-byline">
