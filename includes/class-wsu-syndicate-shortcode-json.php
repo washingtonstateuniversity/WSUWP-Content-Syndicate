@@ -8,8 +8,28 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 	public $shortcode_name = 'wsuwp_json';
 
 	public function __construct() {
+
+		// Allow img_size attribute to shortcode
+		add_filter( 'wsuwp_content_syndicate_default_atts', array( $this, 'add_image_size_attr' ) );
+
 		parent::construct();
 	}
+
+	/**
+	 * Add img_size attribute to shortcode
+	 *
+	 * @since 1.4.6
+	 *
+	 * @param array $atts Default shortcode atts
+	 */
+	public function add_image_size_attr( $atts ) {
+
+		$atts['img_size'] = '';
+
+		return $atts;
+
+	} // End add_image_size_attr
+
 
 	/**
 	 * Add the shortcode provided.
@@ -340,7 +360,9 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 				if ( ! empty( $post->featured_media ) && isset( $post->_embedded->{'wp:featuredmedia'} ) && 0 < count( $post->_embedded->{'wp:featuredmedia'} ) ) {
 					$subset->featured_media = $post->_embedded->{'wp:featuredmedia'}[0];
 
-					if ( isset( $subset->featured_media->media_details->sizes->{'post-thumbnail'} ) ) {
+					if ( ! empty( $atts['img_size'] ) && isset( $subset->featured_media->media_details->sizes->{ $atts['img_size'] } ) ) {
+						$subset->thumbnail = $subset->featured_media->media_details->sizes->{ $atts['img_size'] }->source_url;
+					} elseif ( isset( $subset->featured_media->media_details->sizes->{'post-thumbnail'} ) ) {
 						$subset->thumbnail = $subset->featured_media->media_details->sizes->{'post-thumbnail'}->source_url;
 					} elseif ( isset( $subset->featured_media->media_details->sizes->{'thumbnail'} ) ) {
 						$subset->thumbnail = $subset->featured_media->media_details->sizes->{'thumbnail'}->source_url;
