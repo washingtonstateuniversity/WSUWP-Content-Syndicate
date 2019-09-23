@@ -436,10 +436,10 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 
 					$subset->featured_media = $data;
 
-					if ( isset( $data->media_details->sizes->{'post-thumbnail'} ) ) {
-						$subset->thumbnail = $data->media_details->sizes->{'post-thumbnail'}->source_url;
-					} elseif ( isset( $data->media_details->sizes->thumbnail ) ) {
+					if ( isset( $data->media_details->sizes->thumbnail ) ) {
 						$subset->thumbnail = $data->media_details->sizes->thumbnail->source_url;
+					} elseif ( isset( $data->media_details->sizes->{'post-thumbnail'} ) ) {
+						$subset->thumbnail = $data->media_details->sizes->{'post-thumbnail'}->source_url;
 					} else {
 						$subset->thumbnail = $data->source_url;
 					}
