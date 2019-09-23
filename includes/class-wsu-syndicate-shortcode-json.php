@@ -340,10 +340,10 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 				if ( ! empty( $post->featured_media ) && isset( $post->_embedded->{'wp:featuredmedia'} ) && 0 < count( $post->_embedded->{'wp:featuredmedia'} ) ) {
 					$subset->featured_media = $post->_embedded->{'wp:featuredmedia'}[0];
 
-					if ( isset( $subset->featured_media->media_details->sizes->{'post-thumbnail'} ) ) {
-						$subset->thumbnail = $subset->featured_media->media_details->sizes->{'post-thumbnail'}->source_url;
-					} elseif ( isset( $subset->featured_media->media_details->sizes->{'thumbnail'} ) ) {
+					if ( isset( $subset->featured_media->media_details->sizes->{'thumbnail'} ) ) {
 						$subset->thumbnail = $subset->featured_media->media_details->sizes->{'thumbnail'}->source_url;
+					} elseif ( isset( $subset->featured_media->media_details->sizes->{'post-thumbnail'} ) ) {
+						$subset->thumbnail = $subset->featured_media->media_details->sizes->{'post-thumbnail'}->source_url;
 					} else {
 						$subset->thumbnail = $subset->featured_media->source_url;
 					}
