@@ -208,7 +208,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 			echo '<script>var ' . esc_js( $atts['object'] ) . ' = ' . wp_json_encode( $new_data ) . ';</script>';
 		} elseif ( 'headlines' === $atts['output'] ) {
 			?>
-			<div class="wsuwp-content-syndicate-wrapper">
+			<div class="wsuwp-content-syndicate-wrapper wsuwp-content-syndicate-wrapper--headlines">
 				<ul class="wsuwp-content-syndicate-list">
 					<?php
 					$offset_x = 0;
@@ -225,7 +225,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 			<?php
 		} elseif ( 'excerpts' === $atts['output'] ) {
 			?>
-			<div class="wsuwp-content-syndicate-wrapper">
+			<div class="wsuwp-content-syndicate-wrapper wsuwp-content-syndicate-wrapper--excerpts">
 				<ul class="wsuwp-content-syndicate-list">
 					<?php
 					$offset_x = 0;
@@ -259,7 +259,7 @@ class WSU_Syndicate_Shortcode_JSON extends WSU_Syndicate_Shortcode_Base {
 			<?php
 		} elseif ( 'full' === $atts['output'] ) {
 			?>
-			<div class="wsuwp-content-syndicate-wrapper">
+			<div class="wsuwp-content-syndicate-wrapper wsuwp-content-syndicate-wrapper--full">
 				<div class="wsuwp-content-syndicate-container">
 					<?php
 					$offset_x = 0;
