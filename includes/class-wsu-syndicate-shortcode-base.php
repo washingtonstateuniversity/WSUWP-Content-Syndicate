@@ -19,17 +19,18 @@ class WSU_Syndicate_Shortcode_Base {
 	 * @var array
 	 */
 	public $defaults_atts = array(
-		'object' => 'json_data',
-		'output' => 'json',
-		'host' => 'news.wsu.edu',
-		'scheme' => 'http',
-		'site' => '',
-		'query' => 'posts',
+		'object'      => 'json_data',
+		'output'      => 'json',
+		'host'        => 'news.wsu.edu',
+		'scheme'      => 'http',
+		'site'        => '',
+		'query'       => 'posts',
 		'local_count' => 0,
-		'count' => false,
+		'count'       => false,
 		'date_format' => 'F j, Y',
-		'offset' => 0,
-		'cache_bust' => '',
+		'offset'      => 0,
+		'cache_bust'  => '',
+		'path'        => '',
 	);
 
 	/**
@@ -180,7 +181,9 @@ class WSU_Syndicate_Shortcode_Base {
 			}
 		}
 
-		$request_url = esc_url( $url_scheme . '://' . $site_url['host'] . $site_url['path'] . $this->default_path ) . $atts['query'];
+		$api_path = ( ! empty( $atts['path'] ) ) ? $atts['path'] : $this->default_path;
+
+		$request_url = esc_url( $url_scheme . '://' . $site_url['host'] . $site_url['path'] . $api_path ) . $atts['query'];
 
 		$request = array(
 			'url' => $request_url,
